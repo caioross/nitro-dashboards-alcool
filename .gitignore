@@ -1,0 +1,23 @@
+# --- Material de marca (mantido apenas localmente) ---
+Referencias/
+*.pdf
+
+# --- Sistema operacional ---
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --- Editores / IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.claude/
+
+# --- Temporários ---
+*.log
+*.tmp
+tmp/
+_check.js
