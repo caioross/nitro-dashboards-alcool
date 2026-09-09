@@ -14,7 +14,10 @@ $RECYCLE.BIN/
 *.swp
 *.swo
 *~
-.claude/
+.claude/*
+!.claude/skills/
+!.claude/agents/
+!.claude/launch.json
 
 # --- Temporários ---
 *.log

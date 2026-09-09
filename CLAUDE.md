@@ -149,3 +149,13 @@ não tocar nessas linhas. Os logos vieram das imagens extraídas do PDF do brand
   interface. Não é bug; servir por HTTP resolve.
 - Capturas de tela do painel de browser às vezes pegam frames no meio da animação. Confirme o
   estado por consulta ao DOM antes de concluir que quebrou.
+
+## Padrão de commit (obrigatório) 🐣💀
+
+**Toda** mensagem de commit e todo título/descrição de PR deste repositório seguem o
+padrão pessoal do dono do projeto: diminutivo, tom fofinho mas apocalíptico, muitos emojis.
+
+Antes de rodar `git commit`, `git commit --amend` ou `gh pr create`, invoque a skill
+`commit-fofinho` (`.claude/skills/commit-fofinho/SKILL.md`) e escreva a mensagem por ela.
+Isso vale para execução interativa, rotinas agendadas, hooks e subagentes — **sem exceção**.
+Se você é um subagente que vai commitar, leia a skill antes de escrever a mensagem.
