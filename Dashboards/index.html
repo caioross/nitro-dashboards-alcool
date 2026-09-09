@@ -1016,6 +1016,13 @@ function el(tag, attrs, parent) {
 }
 function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 
+/* Escapa texto vindo do CSV (nome de país, cabeçalho de coluna) antes de
+   concatenar em template strings destinadas a innerHTML. O CSV é dado não
+   confiável — sem isto, `<img onerror=...>` num nome de país executa script. */
+const escHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+  { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+));
+
 const NF = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
 const NF1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const NF2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1307,10 +1314,10 @@ const hideTip = () => tip.classList.remove('on');
 
 function tipCountry(d) {
   const am = activeMetric();
-  let h = `<div class="tn">${d.country}</div><div class="tc">${d.continent}${d.iso3 ? ' · ' + d.iso3 : ''}</div>`;
+  let h = `<div class="tn">${escHtml(d.country)}</div><div class="tc">${escHtml(d.continent)}${d.iso3 ? ' · ' + escHtml(d.iso3) : ''}</div>`;
   for (const m of ST.metrics) {
     const v = valOf(d, m.key);
-    h += `<div class="tr${m.key === am.key ? ' hi' : ''}"><span>${m.short}</span><b>${isFinite(v) ? fmt(v, m.key === 'total' ? 1 : 0) : '—'}</b></div>`;
+    h += `<div class="tr${m.key === am.key ? ' hi' : ''}"><span>${escHtml(m.short)}</span><b>${isFinite(v) ? fmt(v, m.key === 'total' ? 1 : 0) : '—'}</b></div>`;
   }
   return h;
 }
@@ -1699,7 +1706,7 @@ function renderLegend(vals, t, am) {
     sw += `<div class="sw" style="background:${rampColor(t(v))}"></div>`;
   }
   const d = am.key === 'total' ? 1 : 0;
-  lg.innerHTML = `<div class="lt">${am.label} · ${am.unit}</div><div class="swatches">${sw}</div>
+  lg.innerHTML = `<div class="lt">${escHtml(am.label)} · ${escHtml(am.unit)}</div><div class="swatches">${sw}</div>
     <div class="lbls"><span>${fmt(brk[0], d)}</span><span>${fmt(brk[Math.floor(steps / 2)], d)}</span><span>${fmt(brk[steps - 1], d)}</span></div>`;
 }
 
@@ -1782,7 +1789,7 @@ function renderCorr() {
         renderScatter(); renderCorr(); renderRCont();
       });
       rect.addEventListener('mousemove', e => showTip(e,
-        `<div class="tn">${ms[j].short} × ${ms[i].short}</div><div class="tc">Pearson</div>
+        `<div class="tn">${escHtml(ms[j].short)} × ${escHtml(ms[i].short)}</div><div class="tc">Pearson</div>
          <div class="tr hi"><span>r</span><b>${fmtR(r)}</b></div>
          <div class="tr"><span>r²</span><b>${NF2.format(r * r)}</b></div>
          <div class="tr"><span>n</span><b>${pairs.length}</b></div>
@@ -2102,8 +2109,8 @@ function renderTable() {
   const frag = document.createDocumentFragment();
   for (const d of sorted) {
     const t = document.createElement('tr');
-    let h = `<td class="cn">${d.country}${d.iso3 ? ` <span style="color:var(--ink-3);font-size:10px">${d.iso3}</span>` : ''}</td>
-             <td><span class="pill"><i style="background:${CONT_COLOR[d.continent]}"></i>${d.continent}</span></td>`;
+    let h = `<td class="cn">${escHtml(d.country)}${d.iso3 ? ` <span style="color:var(--ink-3);font-size:10px">${escHtml(d.iso3)}</span>` : ''}</td>
+             <td><span class="pill"><i style="background:${CONT_COLOR[d.continent]}"></i>${escHtml(d.continent)}</span></td>`;
     for (const m of ST.metrics) {
       const v = valOf(d, m.key);
       if (m.key === am.key) {
