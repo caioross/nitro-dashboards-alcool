@@ -31,6 +31,62 @@ python -m http.server 8000
 
 ---
 
+## Integrações opcionais (chaves no `.env`)
+
+Duas funcionalidades dependem de API externa e são **opcionais** — sem chave, o painel
+funciona exatamente como antes.
+
+| Recurso | Onde aparece | API |
+|---|---|---|
+| **Conversar com os dados** | botão na parte inferior central | Google Gemini |
+| **Previsão do tempo** | barra superior | OpenWeatherMap |
+
+### Configurando
+
+```bash
+cp .env.example .env   # e preencha as duas chaves
+```
+
+```dotenv
+GEMINI_API_KEY=...
+OPENWEATHER_API_KEY=...
+```
+
+O `.env` fica **fora do versionamento** (`.gitignore`) e é lido em runtime pelo próprio
+`index.html` — não existe `config.js` nem build step.
+
+> **`file://` não lê o `.env`.** O navegador bloqueia `fetch` de arquivo local (mesma
+> limitação do botão *"Carregar ../Dados/drinks.csv"*). Sirva a **raiz do repositório**
+> por HTTP para o `.env` ser encontrado:
+>
+> ```bash
+> python -m http.server 8000
+> # abra http://localhost:8000/Dashboards/index.html
+> ```
+>
+> Sem isso, o painel pede a chave do Gemini na própria interface e a guarda apenas no
+> `localStorage` do navegador.
+
+### Chat com IA
+
+- O contexto enviado ao modelo é montado a partir de `filtered()` — ou seja, **respeita
+  os filtros ativos**: métrica em foco, continentes, busca de país e faixa mín/máx.
+  Os chips no topo do painel mostram exatamente o recorte que foi enviado.
+- Vai estatística descritiva, correlações de Pearson, agregado por continente e o
+  ranking da seleção. Nenhum número é inventado: tudo sai do CSV importado.
+- **Fallback de modelos**: quota estourada (429), indisponibilidade (5xx) ou modelo
+  retirado (404) fazem cair automaticamente para o próximo da cadeia —
+  `gemini-3.8-flash` → `gemini-3.5-flash` → `gemini-flash-latest` →
+  `gemini-3.5-flash-lite` → `gemini-2.5-flash`. O rodapé do chat mostra qual respondeu.
+
+### Clima
+
+- Usa `navigator.geolocation`; negada a permissão (ou sem HTTPS/localhost), o widget
+  vira clicável e aceita a cidade digitada.
+- Cache de 15 min em `localStorage` para não queimar o limite gratuito a cada F5.
+
+---
+
 ## Formato do CSV
 
 O parser é tolerante: remove BOM, autodetecta separador (`, ; \t |`), respeita aspas RFC
@@ -56,6 +112,7 @@ Cabeçalhos em português e `;` como separador também funcionam.
 ```
 Dados/drinks.csv        Amostra de dados (193 países × 4 métricas)
 Dashboards/index.html   O ENTREGÁVEL — dashboard completo em um arquivo
+.env.example            Modelo das chaves de API (copie para .env)
 CLAUDE.md               Guia de arquitetura e regras de manutenção
 ```
 
@@ -83,5 +140,7 @@ fica apenas na cópia local.
 
 - Zoom do mapa exige **Ctrl / ⌘ + roda do mouse** (roda pura rola a página) — decisão de UX.
 - O modal "Suporte" é uma maquete: valida e mostra confirmação, mas não envia nada.
+- As chaves do `.env` chegam ao navegador em texto claro — é um painel interno.
+  Para uso público, ponha as chamadas ao Gemini e ao OpenWeather atrás de um proxy.
 - Detalhes de arquitetura do runtime, do decodificador de TopoJSON e das armadilhas de
   CSS já resolvidas estão em [`CLAUDE.md`](CLAUDE.md).
