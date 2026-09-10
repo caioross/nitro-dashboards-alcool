@@ -2169,7 +2169,12 @@ addEventListener('keydown', e => {
   if (e.key === 'o' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); fileInput.click(); }
 });
 
-/* ---------------------------------------------------------------- suporte (modal de teste — ainda sem envio ao banco) */
+/* ---------------------------------------------------------------- suporte (grava em public.support_messages no Supabase)
+   Só a publishable key entra aqui — a política de RLS da tabela permite INSERT e nada mais,
+   então o formulário abre chamados sem conseguir ler os chamados de ninguém. */
+const SUPA_URL = 'https://dgjltbpczhlikqdrxify.supabase.co';
+const SUPA_KEY = 'sb_publishable_QWJQOTCSjgKYIDEvaMFsaQ_TlTcWn0x';
+
 (() => {
   const modal = $('#supportModal'), form = $('#supportForm'), ok = $('#supportOk');
   let lastFocus = null;
@@ -2191,21 +2196,41 @@ addEventListener('keydown', e => {
   modal.addEventListener('click', e => { if (e.target === modal) close(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('on')) close(); });
 
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
     const payload = {
       name:    $('#spName').value.trim(),
       email:   $('#spEmail').value.trim(),
       topic:   $('#spTopic').value,
-      message: $('#spMsg').value.trim(),
-      ts:      new Date().toISOString()
+      message: $('#spMsg').value.trim()
+      // created_at fica por conta do banco (default now())
     };
-    // TODO: enviar ao banco de dados. Por enquanto é só teste local.
-    console.log('[suporte] chamado de teste (não enviado):', payload);
-    ok.textContent = 'Recebido! Este é um teste — o envio ao banco de dados ainda não está ligado.';
-    ok.classList.add('on');
-    form.reset();
+    const send = form.querySelector('button[type="submit"]');
+    send.disabled = true; send.textContent = 'Enviando…';
+    ok.classList.remove('on'); ok.textContent = '';
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/support_messages', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + SUPA_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) throw new Error((await r.text()) || ('HTTP ' + r.status));
+      ok.textContent = 'Chamado registrado! Retornamos por e-mail.';
+      ok.classList.add('on');
+      form.reset();
+    } catch (err) {
+      console.error('[suporte] falha ao gravar:', err);
+      ok.textContent = 'Não consegui registrar o chamado agora. Tente de novo em instantes.';
+      ok.classList.add('on');
+    } finally {
+      send.disabled = false; send.textContent = 'Enviar';
+    }
   });
 })();
 

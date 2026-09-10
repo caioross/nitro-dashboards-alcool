@@ -7,6 +7,9 @@ O entregável é **um único arquivo**: [`Dashboards/index.html`](Dashboards/ind
 sem build step, sem dependências de runtime e sem chamadas de rede além da folha de estilo
 do Google Fonts (Poppins, com fallback de sistema). Abre direto por `file://`.
 
+> **Documentação técnica de engenharia:** [`docs/README.md`](docs/README.md) — arquitetura,
+> referência de API interna, schema do CSV, integrações, guias e operação.
+
 ---
 
 ## Como usar

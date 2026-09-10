@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O Diário da Nitro — Ed. Nº 1 · 09/09/2026</title>
+<style>
+  :root{
+    --azul:#003663; --azul-claro:#0a4d86; --chartreuse:#94C356; --citron:#B9DA00;
+    --papel:#ffffff; --fundo:#eef2f6; --tinta:#12293d; --tinta-fraca:#5a7183;
+    --regua:#d7e0e8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 16px;background:var(--fundo);color:var(--tinta);
+       font-family:Poppins,'Segoe UI',system-ui,-apple-system,sans-serif;
+       font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .jornal{max-width:740px;margin:0 auto;background:var(--papel);
+          border-top:6px solid var(--azul);box-shadow:0 1px 3px rgba(0,54,99,.12)}
+  .miolo{padding:32px 40px 40px}
+  .chapeu-topo{background:var(--azul);color:#fff;text-align:center;
+        font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;
+        font-weight:600;padding:9px 12px}
+  .cabecalho{text-align:center;padding:30px 40px 20px;border-bottom:3px double var(--azul)}
+  .titulo-jornal{font-size:46px;line-height:1.05;font-weight:700;color:var(--azul);
+        margin:0;letter-spacing:-.02em}
+  .lema{font-style:italic;color:var(--tinta-fraca);font-size:14px;margin:10px 0 0}
+  .expediente{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+        margin-top:18px;padding-top:14px;border-top:1px solid var(--regua);
+        font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+        font-weight:600;color:var(--tinta-fraca)}
+  .rotulo{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;
+        color:var(--azul);margin:38px 0 14px;padding-bottom:7px;
+        border-bottom:2px solid var(--chartreuse)}
+  section:first-of-type .rotulo{margin-top:26px}
+  .clima{background:#f4f8f1;border-left:5px solid var(--chartreuse);
+        padding:16px 20px;margin:24px 0 0;font-size:15px}
+  .clima b{color:var(--azul);letter-spacing:.14em;text-transform:uppercase;
+        font-size:10.5px;display:block;margin-bottom:6px}
+  h2{font-size:28px;line-height:1.2;font-weight:700;color:var(--azul);margin:0 0 12px;
+     letter-spacing:-.015em}
+  h3{font-size:20px;line-height:1.28;font-weight:600;color:var(--azul);margin:0 0 10px}
+  .linha-fina{font-size:16.5px;color:var(--tinta-fraca);margin:0 0 18px;line-height:1.5}
+  .corpo p{margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:16px;
+     line-height:1.72}
+  .corpo p:last-child{margin-bottom:0}
+  .corpo code{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;
+     background:#eef2f6;padding:1px 5px;border-radius:3px;color:var(--azul)}
+  a{color:var(--azul-claro)}
+  .materia{margin-bottom:34px;padding-bottom:30px;border-bottom:1px solid var(--regua)}
+  .materia:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+  .importa{background:#fbfde8;border-left:5px solid var(--citron);padding:14px 18px;
+        margin:18px 0 0;font-size:14.5px;line-height:1.6}
+  .importa b{color:var(--azul)}
+  table.numeros{width:100%;border-collapse:collapse;margin-top:4px}
+  table.numeros td{border:1px solid var(--regua);padding:13px 16px;width:50%;
+        vertical-align:middle}
+  .numeros .rotulo-num{font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+        color:var(--tinta-fraca);font-weight:600;display:block;margin-bottom:3px}
+  .numeros .valor{font-size:27px;font-weight:700;color:var(--azul);
+        font-variant-numeric:tabular-nums;line-height:1}
+  .numeros .nota{font-size:12.5px;color:var(--tinta-fraca);margin-left:8px;font-weight:400}
+  .rodape-numeros{font-size:13.5px;color:var(--tinta-fraca);margin-top:12px;line-height:1.55}
+  .mesa{background:#f7f9fb;border:2px solid var(--azul);padding:22px 24px;margin-top:6px}
+  .mesa-item{margin-bottom:22px;padding-bottom:20px;border-bottom:1px dashed var(--regua)}
+  .mesa-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:0}
+  .mesa-item h4{font-size:16.5px;color:var(--azul);margin:0 0 8px;font-weight:600;
+        line-height:1.35}
+  .mesa p{margin:0 0 10px;font-size:15px}
+  pre{background:var(--azul);color:#dff0c7;padding:12px 15px;overflow-x:auto;
+        font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.5;
+        margin:10px 0;border-radius:3px}
+  .assinatura{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--tinta-fraca);font-weight:600;margin:0 0 16px}
+  blockquote{margin:0 0 16px;padding:2px 0 2px 20px;border-left:4px solid var(--chartreuse);
+        font-family:Georgia,serif;font-style:italic;font-size:17px;line-height:1.6;
+        color:var(--azul)}
+  .radar{list-style:none;padding:0;margin:0}
+  .radar li{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--regua);
+        font-size:14.5px;line-height:1.55}
+  .radar li:last-child{border-bottom:0}
+  .radar .num{font-weight:700;color:var(--azul);font-variant-numeric:tabular-nums;
+        white-space:nowrap;min-width:52px}
+  .colofao{background:var(--azul);color:#fff;padding:24px 40px;text-align:center;
+        font-size:11px;letter-spacing:.16em;text-transform:uppercase;line-height:2}
+  .colofao .marca{font-size:15px;font-weight:700;letter-spacing:.22em;
+        color:var(--citron);margin-bottom:8px}
+  .colofao a{color:#bcd9f2}
+  @media (max-width:620px){
+    body{padding:0}
+    .miolo,.cabecalho,.colofao{padding-left:22px;padding-right:22px}
+    .titulo-jornal{font-size:32px}
+    h2{font-size:23px}
+    table.numeros td{display:block;width:100%;border-top:0}
+    table.numeros tr:first-child td:first-child{border-top:1px solid var(--regua)}
+  }
+</style>
+</head>
+<body>
+<div class="jornal">
+
+  <div class="chapeu-topo">Boletim diário · Edição do dono · Confidencial</div>
+
+  <header class="cabecalho">
+    <h1 class="titulo-jornal">O Diário da Nitro</h1>
+    <p class="lema">“Tudo o que aconteceu no painel enquanto você tocava a empresa”</p>
+    <div class="expediente">
+      <span>Edição Nº 1</span>
+      <span>Quarta-feira, 9 de setembro de 2026</span>
+      <span>caioross/nitro-dashboards-alcool · main</span>
+    </div>
+  </header>
+
+  <div class="miolo">
+
+    <div class="clima">
+      <b>Clima do projeto</b>
+      Edição de fundação: esta primeira cobre desde o commit inicial, na noite de segunda,
+      até as 17h22 desta quarta — 5 commits, 1 PR mergeada de 830 linhas, 10 issues abertas
+      e 3 fechadas. Dia de muita apuração e pouca entrega: das três issues fechadas, duas
+      foram marcadas como resolvidas sem que a correção tivesse entrado no <code>main</code>,
+      e é disso que trata a capa. A boa notícia veio de fora do código: quatro leitores
+      estranhos ao projeto olharam o painel pela primeira vez e escreveram o que viram.
+    </div>
+
+    <section>
+      <div class="rotulo">Capa · o quadro e o código</div>
+      <h2>Duas issues críticas foram fechadas hoje. As correções continuam paradas em PRs que ninguém mergeou.</h2>
+      <p class="linha-fina">O painel que está no <code>main</code> neste momento ainda multiplica
+        números por mil e ainda executa JavaScript vindo da planilha importada. No quadro do
+        projeto, os dois problemas constam como resolvidos desde as 11h de hoje.</p>
+      <div class="corpo">
+        <p>Às 11h21, a PR <a href="https://github.com/caioross/nitro-dashboards-alcool/pull/12">#12</a>
+          foi aberta com a correção de <code>toNum</code>. Doze segundos depois, às 11h22, a issue
+          <a href="https://github.com/caioross/nitro-dashboards-alcool/issues/1">#1</a> foi fechada.
+          Às 11h24, a PR <a href="https://github.com/caioross/nitro-dashboards-alcool/pull/14">#14</a>
+          foi aberta com a correção do XSS; às 11h25, a issue
+          <a href="https://github.com/caioross/nitro-dashboards-alcool/issues/2">#2</a> foi fechada.
+          Nenhuma das duas PRs foi mergeada. Sete horas depois, as duas continuam abertas.</p>
+        <p>Esta redação conferiu por consulta independente, e não pela ausência de erro: o
+          <code>Dashboards/index.html</code> servido pelo <code>main</code> agora tem
+          <b>zero</b> ocorrências de <code>escHtml</code> — o helper de escape que a PR #14
+          introduz. O código que está no ar é o mesmo de antes das duas correções.</p>
+        <p>O que isso significa na prática. A issue #1 descrevia que
+          <code>toNum</code> lê <code>9.234</code> como “9 mil 234” e <code>0.500</code> como 500 —
+          todo valor com 1 a 3 dígitos inteiros e exatamente três casas decimais é multiplicado
+          por mil, em silêncio. A própria issue mede a contaminação: KPIs, escala do mapa
+          coroplético, ranking, histograma, correlações de Pearson e o CSV exportado. Ela foi
+          classificada como <b>crítica</b> por quem a abriu.</p>
+        <p>A issue #2 descrevia que o nome de país e o cabeçalho de coluna do CSV vão crus para
+          <code>innerHTML</code> em quatro pontos. Uma planilha com
+          <code>&lt;img src=x onerror=...&gt;</code> no nome do país executa o handler ao renderizar
+          a tabela. Foi classificada como <b>alta</b>, com a observação de que, servido por HTTP,
+          o script de terceiro roda na mesma origem — e pode exfiltrar a planilha por rede,
+          apesar da frase “nada sai deste navegador” exibida na tela de importação.</p>
+        <p>Vale registrar o que as duas PRs têm de bom: ambas trazem verificação real —
+          tabela de 18 casos isolados na #12, payload da issue reimportado no painel na #14,
+          <code>node --check</code> nas duas. O trabalho está feito. Ele só não está no
+          <code>main</code>.</p>
+      </div>
+      <div class="importa"><b>📌 Por que importa para você:</b> se você abrir o painel hoje e
+        subir uma planilha com três casas decimais — litros de álcool puro per capita, taxas,
+        qualquer base da OMS — os números na tela estarão mil vezes maiores, sem nenhum aviso.
+        E o quadro do projeto vai te dizer que isso foi resolvido às 11h22.
+        (#1 → PR #12 · #2 → PR #14, as duas abertas)</div>
+    </section>
+
+    <section>
+      <div class="rotulo">Os números do dia</div>
+      <table class="numeros">
+        <tr>
+          <td><span class="rotulo-num">Issues abertas</span>
+              <span class="valor">10</span><span class="nota">3 bugs, 1 de segurança</span></td>
+          <td><span class="rotulo-num">Issues fechadas</span>
+              <span class="valor">3</span><span class="nota">todas como resolvidas</span></td>
+        </tr>
+        <tr>
+          <td><span class="rotulo-num">PRs mergeadas</span>
+              <span class="valor">1</span><span class="nota">+830 / −2 linhas</span></td>
+          <td><span class="rotulo-num">PRs abertas esperando</span>
+              <span class="valor">2</span><span class="nota">nenhuma em rascunho</span></td>
+        </tr>
+        <tr>
+          <td><span class="rotulo-num">Discussions novas</span>
+              <span class="valor">5</span><span class="nota">4 da Câmara de Personas</span></td>
+          <td><span class="rotulo-num">Commits no main</span>
+              <span class="valor">5</span><span class="nota">desde a fundação</span></td>
+        </tr>
+        <tr>
+          <td><span class="rotulo-num">Backlog aberto</span>
+              <span class="valor">7</span><span class="nota">issues</span></td>
+          <td><span class="rotulo-num">Releases</span>
+              <span class="valor">0</span><span class="nota">nenhuma publicada ainda</span></td>
+        </tr>
+      </table>
+      <p class="rodape-numeros">Saldo do dia: abriu 10, fechou 3. O backlog nasceu e já subiu —
+        o que é normal numa semana de fundação, em que a apuração de bugs corre na frente da
+        correção. O número a vigiar não é esse: são as 2 PRs prontas que não entraram, porque
+        elas fecham 2 das 3 issues mais graves do quadro.</p>
+    </section>
+
+    <section>
+      <div class="rotulo">Pesquisa · a câmara de personas entrou no painel</div>
+      <div class="materia">
+        <h3>Quatro leitores de fora abriram o painel pela primeira vez. Nenhum reclamou do que o time vinha consertando.</h3>
+        <p class="linha-fina">Em 63 segundos, entre 13h55 e 13h56, quatro discussions foram
+          abertas por perfis diferentes. Duas delas, por caminhos independentes, bateram na
+          mesma parede: o painel mostra número de saúde pública sem dizer como se lê aquilo.</p>
+        <div class="corpo">
+          <p><b>Ana, analista de marketing</b>, quer levar o achado para uma reunião e só
+            consegue exportar CSV — então dá print, que sai com o fundo escuro cortado e a
+            barra de filtro no meio. Pediu um “baixar PNG” ou, no mínimo, um
+            <code>@media print</code> decente. Na mesma discussion,
+            <b>Duda, de UI/UX</b>, respondeu com a solução barata: cerca de 30 linhas de CSS,
+            zero JS, uma seção por página
+            (<a href="https://github.com/caioross/nitro-dashboards-alcool/discussions/15">#15</a>).</p>
+          <p><b>Duda</b> abriu a sua própria: os rótulos de KPI e cabeçalhos de tabela estão em
+            9,5 px com <code>letter-spacing</code> de cerca de 0,19em. Nesse tamanho, diz ela,
+            o tracking largo separa as letras a ponto de a palavra deixar de ser lida como bloco
+            — “DESVIO PADRÃO” vira D E S V I O. Propôs subir para 11 px, baixar o tracking para
+            0,08–0,10em e clarear um passo o <code>--ink-3</code>, mantendo a assinatura
+            wide-set da marca
+            (<a href="https://github.com/caioross/nitro-dashboards-alcool/discussions/18">#18</a>).</p>
+          <p><b>Bia, 22 anos</b>, abriu o painel no celular por curiosidade e travou no
+            vocabulário: não sabe se “álcool puro” é litro de bebida ou litro do álcool dentro
+            da bebida, nem o que é uma “dose”, nem o que muda ao trocar a escala de quantis para
+            linear (<a href="https://github.com/caioross/nitro-dashboards-alcool/discussions/16">#16</a>).
+            <b>Carlos</b>, por um caminho completamente diferente, chegou ao mesmo lugar: não
+            achou fonte, ano de referência nem definição do que está sendo medido, e observou
+            que a seção “Maiores consumidores”, com pódio visual e sem uma linha de contexto,
+            lê como tabela de recordes
+            (<a href="https://github.com/caioross/nitro-dashboards-alcool/discussions/17">#17</a>).</p>
+          <p>Nenhum dos quatro mencionou parser, XSS, chave de API ou deploy — que é
+            exatamente o que ocupou o dia da frota. Não é contradição: bug crítico é invisível
+            até morder. Mas a lista de fora tem uma característica que a de dentro não tem —
+            é quase toda barata, e é toda ela sobre a primeira meia hora de uso.</p>
+        </div>
+        <div class="importa"><b>📌 Por que importa para você:</b> os quatro pedidos cabem no
+          arquivo único, sem build step e sem biblioteca — CSS de impressão, dois tokens de
+          tipografia, um glossário e uma linha de metodologia no rodapé. É o menor investimento
+          do backlog com o maior efeito sobre quem abre o painel pela primeira vez.
+          (#15, #16, #17, #18 — as quatro abertas, nenhuma virou issue ainda)</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="rotulo">Segurança · o que o próprio manual manda fazer</div>
+      <div class="materia">
+        <h3>O caminho de instalação documentado no README publica as suas duas chaves de API em texto puro</h3>
+        <p class="linha-fina">Não é erro de operação: a arquitetura exige que o
+          <code>.env</code> seja alcançável por HTTP para o recurso funcionar, e o README manda
+          servir a raiz do repositório para que isso aconteça.</p>
+        <div class="corpo">
+          <p>O painel lê as chaves fazendo <code>fetch</code> do <code>.env</code> servido pelo
+            próprio servidor. Com qualquer servidor estático apontado para a raiz — o
+            <code>http.server</code> do Python que o README sugere, nginx, Netlify, GitHub Pages,
+            S3 — <code>GET /.env</code> devolve <code>GEMINI_API_KEY</code> e
+            <code>OPENWEATHER_API_KEY</code> em texto puro, sem sequer abrir o dashboard. O
+            mesmo servidor entrega <code>/.git/</code>. A issue registra que o working tree do
+            ambiente já tem as duas chaves preenchidas, com 53 e 32 caracteres — ou seja, o
+            cenário de risco é o fluxo real de uso, não uma hipótese
+            (<a href="https://github.com/caioross/nitro-dashboards-alcool/issues/7">#7</a>,
+            aberta e sem responsável).</p>
+          <p>A segunda promessa quebrada é de privacidade. Logo abaixo da dropzone, a tela de
+            importação afirma “processamento 100% local, nada sai deste navegador”. Desde a PR
+            #5, mergeada hoje de manhã, o chat com IA envia ao Google, a cada pergunta, a
+            estatística descritiva por métrica, a matriz de correlação, o agregado por
+            continente, o Top 20 e o Bottom 20 por país — e, quando a seleção tem 60 países ou
+            menos, a <b>lista completa, país por país, com todos os valores</b>. O público-alvo
+            do painel é técnico e pode subir planilha proprietária confiando na frase que está
+            na tela (<a href="https://github.com/caioross/nitro-dashboards-alcool/issues/8">#8</a>).</p>
+        </div>
+        <div class="importa"><b>📌 Por que importa para você:</b> são duas frases que o produto
+          assina e não cumpre. A #7 cobra a fatura na conta de quem seguiu o manual à risca; a
+          #8, na confiança de quem leu a garantia antes de arrastar a planilha. As duas são de
+          texto e de arquitetura, não de bug — e nenhuma delas depende de um agente esperto,
+          depende de uma decisão. (#7 e #8, abertas)</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="rotulo">Bastidores · a faxina que ninguém vê</div>
+      <div class="corpo">
+        <p><b>Chat com IA e clima (PR #5, mergeada às 10h27).</b> 830 linhas somadas, 2
+          removidas, 5 arquivos. Fecha a issue #4. O contexto enviado ao modelo é montado a
+          partir de <code>filtered()</code>, então os filtros do painel realmente entram na
+          pergunta — que era o pedido central. Traz cadeia de fallback entre cinco modelos e
+          dois bugs achados durante o próprio teste, incluindo o SSE do Gemini em CRLF que
+          descartava a resposta inteira em silêncio.</p>
+        <p><b>Rastreabilidade da discussion #6.</b> O incômodo do deploy na Vercel virou duas
+          issues com escopo escrito — #10 (ler as chaves das environment variables, sem janela
+          de chave) e #11 (servir o painel na raiz do domínio). É o caminho certo: reclamação
+          vira issue com alternativa e restrição registradas.</p>
+        <p><b>Regra de commit.</b> O commit <code>a87bff9</code> fixou no
+          <code>CLAUDE.md</code> o padrão de mensagem do projeto. E o último commit do dia,
+          <code>515db92</code>, subiu um <code>jornal.pdf</code> ao repositório — a referência
+          que deu origem a este jornal.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="rotulo">🖋 A mesa do dono</div>
+      <div class="mesa">
+        <p style="margin-top:0;font-size:14px;color:#5a7183">
+          Só entra aqui o que exige credencial sua, painel de terceiro ou uma decisão que não
+          é de agente — coisas que a frota não consegue fazer sozinha.
+        </p>
+
+        <div class="mesa-item">
+          <h4>1. Duas PRs prontas esperando o seu merge — e são as da capa</h4>
+          <p>As PRs #12 e #14 corrigem as duas issues mais graves do quadro, estão validadas e
+            não têm conflito conhecido. Enquanto não entram, o <code>main</code> segue com a
+            corrupção de dados e com o XSS. Detalhe que ajuda: as duas trazem
+            <code>Closes #1</code> e <code>Closes #2</code> no corpo — o merge fecha as issues
+            sozinho, não precisa de nenhum gesto extra.</p>
+          <p><b>Caminho:</b> revisar e mergear
+            <a href="https://github.com/caioross/nitro-dashboards-alcool/pull/12">PR #12</a> e
+            <a href="https://github.com/caioross/nitro-dashboards-alcool/pull/14">PR #14</a>.
+            Se decidir <i>não</i> mergear alguma, reabra a issue correspondente — hoje ela está
+            fechada sem correção no ar.</p>
+          <p><b>Como conferir depois:</b></p>
+          <pre>gh api repos/caioross/nitro-dashboards-alcool/contents/Dashboards/index.html \
+  --jq '.content' | base64 -d | grep -c escHtml</pre>
+          <p style="margin-bottom:0">Hoje responde <code>0</code>. Depois do merge da #14,
+            responde um número maior que zero — e aí o XSS está corrigido no que está no ar,
+            não só no quadro.</p>
+        </div>
+
+        <div class="mesa-item">
+          <h4>2. As duas chaves de API precisam ser trocadas — e só você tem as contas</h4>
+          <p>Pela issue #7, o <code>.env</code> com as duas chaves preenchidas fica baixável
+            por qualquer um que alcance o servidor quando a raiz do repo é servida por HTTP,
+            como o README instrui. Independentemente da correção estrutural, as chaves atuais
+            devem ser consideradas queimadas.</p>
+          <p><b>Caminho:</b> revogar e gerar de novo em
+            <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a> e em
+            <a href="https://home.openweathermap.org/api_keys">home.openweathermap.org/api_keys</a>,
+            e atualizar o <code>.env</code> local. É a única peça desta edição que nenhum
+            agente pode executar por você.</p>
+        </div>
+
+        <div class="mesa-item">
+          <h4>3. O deploy na Vercel espera o seu painel</h4>
+          <p>As issues #10 e #11 nasceram do seu próprio incômodo na discussion #6. A parte de
+            código a frota escreve; o que falta é do outro lado do login: cadastrar
+            <code>GEMINI_API_KEY</code> e <code>OPENWEATHER_API_KEY</code> nas environment
+            variables do projeto na Vercel. Enquanto isso não existe, o site publicado não tem
+            clima e sempre pede chave no chat.</p>
+          <p style="margin-bottom:0"><b>Decisão embutida:</b> a #10 propõe uma rota
+            <code>/api</code> como proxy, que também resolveria a #7 — mas isso contraria o
+            “arquivo único, sem build step” do <code>CLAUDE.md</code>. Comente na #10 qual dos
+            dois caminhos vale, e a frota executa.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="rotulo">Opinião</div>
+      <h3>Fechar a issue é uma promessa feita a quem lê o quadro — e hoje ela não foi cumprida</h3>
+      <p class="assinatura">pela Redação · editoria de qualidade</p>
+      <div class="corpo">
+        <p>O quadro do projeto é a única superfície em que alguém que não lê código descobre o
+          estado do produto. É lá que você olha na segunda de manhã, é lá que um convidado olha
+          antes de confiar no painel, e é de lá que sai a resposta para “isso já foi resolvido?”.
+          Uma issue fechada é uma frase afirmativa: <i>este problema não existe mais</i>.</p>
+        <p>Hoje essa frase foi dita duas vezes, e nas duas vezes ela era falsa — não por
+          má-fé, mas por um gesto de doze segundos. A PR foi aberta e a issue foi fechada em
+          seguida, como se abrir a correção e entregar a correção fossem o mesmo ato. Não são.
+          Entre os dois há a revisão, o merge, e a possibilidade real de a PR ser recusada.</p>
+        <p>O detalhe que dói é que a automação já estava certa. As duas PRs declaram
+          <code>Closes #1</code> e <code>Closes #2</code> no corpo: o GitHub fecharia as issues
+          sozinho, no instante do merge, exatamente no momento verdadeiro. O fechamento manual
+          não adiantou trabalho nenhum — só antecipou uma afirmação que ainda não era verdade.</p>
+        <p>O custo é assimétrico, e é isso que faz a regra valer a pena. Uma issue aberta a mais
+          custa uma olhada perdida no quadro. Uma issue fechada a menos custa a redescoberta do
+          mesmo bug por um usuário, meses depois, com a agravante de que ninguém vai procurar no
+          histórico um problema que consta como resolvido. A regra que esta redação adota, e
+          recomenda à casa: <b>quem fecha a issue é o merge</b>. Nunca a mão.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="rotulo">A voz da comunidade</div>
+      <h3>“438 doses de destilado não me diz nada sem saber o tamanho da dose”</h3>
+      <blockquote>“É bonito, mas travei em algumas palavras e não achei explicação em lugar
+        nenhum. ‘Álcool puro (litros/pessoa/ano)’ — é litro de bebida ou litro do álcool de
+        dentro da bebida? Do jeito que está, quem não é da área (eu) olha os números e não sabe
+        se é muito ou pouco.”</blockquote>
+      <div class="corpo">
+        <p>Bia tem 22 anos, abriu o painel no celular por curiosidade — queria ver se o país
+          dela bebe mais que os vizinhos — e saiu sem saber ler o que viu. O pedido dela é
+          modesto: um “?” ao lado de cada termo, ou um glossário curto.</p>
+        <p>A resposta honesta é que ela tem razão e que o conserto é dos mais baratos do
+          backlog: nenhuma tela nova, nenhuma biblioteca, cabe no arquivo único. E Carlos, que
+          escreveu na mesma janela de um minuto sem ter lido a discussion dela, pediu a mesma
+          coisa por outro motivo — sem definição fixa de dose, “326 doses por ano” soa como
+          exagero absurdo ou como banalidade, dependendo de a pessoa imaginar 30 ml ou 100 ml.
+          Num painel sobre saúde pública, isso não é detalhe de copy.</p>
+      </div>
+      <div class="importa"><b>📌 Por que importa para você:</b> dois leitores independentes
+        chegaram à mesma conclusão em um minuto, por caminhos opostos — uma por não entender,
+        o outro por entender demais. Quando duas pessoas que não se falaram apontam o mesmo
+        buraco, o buraco existe. (#16 e #17, abertas como discussions)</div>
+    </section>
+
+    <section>
+      <div class="rotulo">Radar · em trânsito</div>
+      <ul class="radar">
+        <li><span class="num">PR #12</span>
+            <span>Correção de <code>toNum</code>. Aberta às 11h21, validada com 18 casos.
+              Espera merge — e é o que separa o quadro da realidade.</span></li>
+        <li><span class="num">PR #14</span>
+            <span>Correção do XSS. Aberta às 11h24, validada com o payload da issue no painel
+              rodando. Espera merge.</span></li>
+        <li><span class="num">#7</span>
+            <span>Chaves de API baixáveis em texto puro pelo caminho que o README documenta.
+              Segurança, aberta, sem responsável.</span></li>
+        <li><span class="num">#8</span>
+            <span>“Nada sai deste navegador” deixou de ser verdade quando o chat entrou.
+              Precisa de decisão de texto ou de aviso explícito antes do primeiro envio.</span></li>
+        <li><span class="num">#3</span>
+            <span>Erro de importação escrito num elemento invisível: trocar o CSV por um
+              arquivo inválido não produz reação nenhuma na tela.</span></li>
+        <li><span class="num">#9</span>
+            <span>Chave do Gemini inválida devolve 400, não 401 — cai no erro genérico, o
+              campo de chave não reabre e o usuário fica sem saída.</span></li>
+        <li><span class="num">#10 · #11</span>
+            <span>Deploy na Vercel: environment variables e raiz do domínio. Dependem da sua
+              mesa (item 3).</span></li>
+        <li><span class="num">#13</span>
+            <span>Widget de clima mostra “mín/máx” que são a mesma leitura instantânea
+              repetida. Impacto baixo, conserto barato.</span></li>
+        <li><span class="num">#15 · #18</span>
+            <span>Exportar imagem / CSS de impressão, e a tipografia dos rótulos. Vieram da
+              Câmara de Personas e ainda não viraram issue.</span></li>
+      </ul>
+      <p class="rodape-numeros">Nada aqui está parado há mais de um dia — o projeto tem dois
+        dias de vida. A régua desta seção começa a valer de verdade a partir da próxima semana,
+        quando “aberta há 9 dias” passar a significar alguma coisa.</p>
+    </section>
+
+  </div>
+
+  <div class="colofao">
+    <div class="marca">O Diário da Nitro</div>
+    Redação composta por agentes · fonte: GitHub caioross/nitro-dashboards-alcool<br>
+    Edição Nº 1 · quarta-feira, 9 de setembro de 2026<br>
+    A próxima edição chega amanhã, às 21h.
+  </div>
+
+</div>
+</body>
+</html>

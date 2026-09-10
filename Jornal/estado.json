@@ -1,0 +1,16 @@
+{
+  "ultimaEdicao": 1,
+  "ultimoCorte": "2026-09-09T20:22:47Z",
+  "historico": [
+    {
+      "numero": 1,
+      "arquivo": "Jornal\\edicoes\\2026-09-09.html",
+      "publicadaEm": "2026-09-09T17:30:21-03:00",
+      "janela": {
+        "desde": "2026-09-08T00:00:00Z",
+        "ate": "2026-09-09T20:22:47Z"
+      },
+      "bytes": 29259
+    }
+  ]
+}

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<!--
+  MODELO DA EDIÇÃO — O Diário da Nitro
+  ------------------------------------------------------------------
+  Copie este arquivo, troque os {{MARCADORES}} e grave em
+  Jornal/edicoes/AAAA-MM-DD.html. NÃO edite este modelo para publicar.
+
+  Blocos opcionais: apague a <section> inteira quando não houver assunto.
+  Nunca deixe um marcador {{ASSIM}} sobrar no arquivo publicado.
+
+  No fim do arquivo, dentro de um comentário, ficam os PEDAÇOS REUTILIZÁVEIS
+  (matéria, item de bastidor, item da mesa, linha do radar) para copiar.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O Diário da Nitro — Ed. Nº {{EDICAO_NUM}} · {{DATA_CURTA}}</title>
+<style>
+  /* Marca Nitro: Admiral Blue #003663 · Chartreuse #94C356 · Citron #B9DA00 */
+  :root{
+    --azul:#003663; --azul-claro:#0a4d86; --chartreuse:#94C356; --citron:#B9DA00;
+    --papel:#ffffff; --fundo:#eef2f6; --tinta:#12293d; --tinta-fraca:#5a7183;
+    --regua:#d7e0e8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 16px;background:var(--fundo);color:var(--tinta);
+       font-family:Poppins,'Segoe UI',system-ui,-apple-system,sans-serif;
+       font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .jornal{max-width:740px;margin:0 auto;background:var(--papel);
+          border-top:6px solid var(--azul);box-shadow:0 1px 3px rgba(0,54,99,.12)}
+  .miolo{padding:32px 40px 40px}
+
+  /* ---------- cabeçalho ---------- */
+  .chapeu-topo{background:var(--azul);color:#fff;text-align:center;
+        font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;
+        font-weight:600;padding:9px 12px}
+  .cabecalho{text-align:center;padding:30px 40px 20px;border-bottom:3px double var(--azul)}
+  .titulo-jornal{font-size:46px;line-height:1.05;font-weight:700;color:var(--azul);
+        margin:0;letter-spacing:-.02em}
+  .lema{font-style:italic;color:var(--tinta-fraca);font-size:14px;margin:10px 0 0}
+  .expediente{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+        margin-top:18px;padding-top:14px;border-top:1px solid var(--regua);
+        font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+        font-weight:600;color:var(--tinta-fraca)}
+
+  /* ---------- rótulos de seção ---------- */
+  .rotulo{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;
+        color:var(--azul);margin:38px 0 14px;padding-bottom:7px;
+        border-bottom:2px solid var(--chartreuse)}
+  section:first-of-type .rotulo{margin-top:26px}
+
+  /* ---------- clima ---------- */
+  .clima{background:#f4f8f1;border-left:5px solid var(--chartreuse);
+        padding:16px 20px;margin:24px 0 0;font-size:15px}
+  .clima b{color:var(--azul);letter-spacing:.14em;text-transform:uppercase;
+        font-size:10.5px;display:block;margin-bottom:6px}
+
+  /* ---------- matérias ---------- */
+  h2{font-size:28px;line-height:1.2;font-weight:700;color:var(--azul);margin:0 0 12px;
+     letter-spacing:-.015em}
+  h3{font-size:20px;line-height:1.28;font-weight:600;color:var(--azul);margin:0 0 10px}
+  .linha-fina{font-size:16.5px;color:var(--tinta-fraca);margin:0 0 18px;line-height:1.5}
+  .corpo p{margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:16px;
+     line-height:1.72}
+  .corpo p:last-child{margin-bottom:0}
+  .corpo code{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;
+     background:#eef2f6;padding:1px 5px;border-radius:3px;color:var(--azul)}
+  a{color:var(--azul-claro)}
+  .materia{margin-bottom:34px;padding-bottom:30px;border-bottom:1px solid var(--regua)}
+  .materia:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+
+  /* ---------- "por que importa" ---------- */
+  .importa{background:#fbfde8;border-left:5px solid var(--citron);padding:14px 18px;
+        margin:18px 0 0;font-size:14.5px;line-height:1.6}
+  .importa b{color:var(--azul)}
+
+  /* ---------- números do dia ---------- */
+  table.numeros{width:100%;border-collapse:collapse;margin-top:4px}
+  table.numeros td{border:1px solid var(--regua);padding:13px 16px;width:50%;
+        vertical-align:middle}
+  .numeros .rotulo-num{font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+        color:var(--tinta-fraca);font-weight:600;display:block;margin-bottom:3px}
+  .numeros .valor{font-size:27px;font-weight:700;color:var(--azul);
+        font-variant-numeric:tabular-nums;line-height:1}
+  .numeros .nota{font-size:12.5px;color:var(--tinta-fraca);margin-left:8px;font-weight:400}
+  .rodape-numeros{font-size:13.5px;color:var(--tinta-fraca);margin-top:12px;line-height:1.55}
+
+  /* ---------- mesa do dono ---------- */
+  .mesa{background:#f7f9fb;border:2px solid var(--azul);padding:22px 24px;margin-top:6px}
+  .mesa-item{margin-bottom:22px;padding-bottom:20px;border-bottom:1px dashed var(--regua)}
+  .mesa-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:0}
+  .mesa-item h4{font-size:16.5px;color:var(--azul);margin:0 0 8px;font-weight:600;
+        line-height:1.35}
+  .mesa p{margin:0 0 10px;font-size:15px}
+  pre{background:var(--azul);color:#dff0c7;padding:12px 15px;overflow-x:auto;
+        font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.5;
+        margin:10px 0;border-radius:3px}
+
+  /* ---------- opinião / voz ---------- */
+  .assinatura{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--tinta-fraca);font-weight:600;margin:0 0 16px}
+  blockquote{margin:0 0 16px;padding:2px 0 2px 20px;border-left:4px solid var(--chartreuse);
+        font-family:Georgia,serif;font-style:italic;font-size:17px;line-height:1.6;
+        color:var(--azul)}
+
+  /* ---------- radar ---------- */
+  .radar{list-style:none;padding:0;margin:0}
+  .radar li{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--regua);
+        font-size:14.5px;line-height:1.55}
+  .radar li:last-child{border-bottom:0}
+  .radar .num{font-weight:700;color:var(--azul);font-variant-numeric:tabular-nums;
+        white-space:nowrap;min-width:52px}
+
+  /* ---------- colofão ---------- */
+  .colofao{background:var(--azul);color:#fff;padding:24px 40px;text-align:center;
+        font-size:11px;letter-spacing:.16em;text-transform:uppercase;line-height:2}
+  .colofao .marca{font-size:15px;font-weight:700;letter-spacing:.22em;
+        color:var(--citron);margin-bottom:8px}
+  .colofao a{color:#bcd9f2}
+
+  @media (max-width:620px){
+    body{padding:0}
+    .miolo,.cabecalho,.colofao{padding-left:22px;padding-right:22px}
+    .titulo-jornal{font-size:32px}
+    h2{font-size:23px}
+    table.numeros td{display:block;width:100%;border-top:0}
+    table.numeros tr:first-child td:first-child{border-top:1px solid var(--regua)}
+  }
+</style>
+</head>
+<body>
+<div class="jornal">
+
+  <div class="chapeu-topo">Boletim diário · Edição do dono · Confidencial</div>
+
+  <header class="cabecalho">
+    <h1 class="titulo-jornal">O Diário da Nitro</h1>
+    <p class="lema">“Tudo o que aconteceu no painel enquanto você tocava a empresa”</p>
+    <div class="expediente">
+      <span>Edição Nº {{EDICAO_NUM}}</span>
+      <span>{{DATA_EXTENSO}}</span>
+      <span>{{REPO}} · main</span>
+    </div>
+  </header>
+
+  <div class="miolo">
+
+    <!-- ================= CLIMA ================= -->
+    <div class="clima">
+      <b>Clima do projeto</b>
+      {{CLIMA}}
+    </div>
+
+    <!-- ================= CAPA ================= -->
+    <section>
+      <div class="rotulo">Capa · {{CAPA_CHAPEU}}</div>
+      <h2>{{CAPA_TITULO}}</h2>
+      <p class="linha-fina">{{CAPA_LINHA_FINA}}</p>
+      <div class="corpo">
+        {{CAPA_CORPO}}
+      </div>
+      <div class="importa"><b>📌 Por que importa para você:</b> {{CAPA_IMPORTA}}</div>
+    </section>
+
+    <!-- ================= NÚMEROS ================= -->
+    <section>
+      <div class="rotulo">Os números do dia</div>
+      <table class="numeros">
+        {{NUMEROS_LINHAS}}
+      </table>
+      <p class="rodape-numeros">{{NUMEROS_NOTA}}</p>
+    </section>
+
+    <!-- ================= MATÉRIAS ================= -->
+    <!-- Uma <section> por matéria. Copie o pedaço "MATÉRIA" do rodapé. -->
+    {{MATERIAS}}
+
+    <!-- ================= BASTIDORES (opcional) ================= -->
+    <section>
+      <div class="rotulo">Bastidores · a faxina que ninguém vê</div>
+      <div class="corpo">
+        {{BASTIDORES}}
+      </div>
+    </section>
+
+    <!-- ================= MESA DO DONO ================= -->
+    <section>
+      <div class="rotulo">🖋 A mesa do dono</div>
+      <div class="mesa">
+        <p style="margin-top:0;font-size:14px;color:#5a7183">
+          Só entra aqui o que exige credencial sua, painel de terceiro ou dinheiro —
+          coisas que agente nenhum consegue fazer.
+        </p>
+        {{MESA_ITENS}}
+      </div>
+    </section>
+
+    <!-- ================= OPINIÃO (opcional) ================= -->
+    <section>
+      <div class="rotulo">Opinião</div>
+      <h3>{{OPINIAO_TITULO}}</h3>
+      <p class="assinatura">por {{OPINIAO_AUTOR}}</p>
+      <div class="corpo">
+        {{OPINIAO_CORPO}}
+      </div>
+    </section>
+
+    <!-- ================= VOZ DA COMUNIDADE (opcional) ================= -->
+    <section>
+      <div class="rotulo">A voz da comunidade</div>
+      <h3>{{VOZ_TITULO}}</h3>
+      <blockquote>{{VOZ_CITACAO}}</blockquote>
+      <div class="corpo">
+        {{VOZ_CORPO}}
+      </div>
+      <div class="importa"><b>📌 Por que importa para você:</b> {{VOZ_IMPORTA}}</div>
+    </section>
+
+    <!-- ================= RADAR ================= -->
+    <section>
+      <div class="rotulo">Radar · em trânsito</div>
+      <ul class="radar">
+        {{RADAR_ITENS}}
+      </ul>
+      <p class="rodape-numeros">{{RADAR_NOTA}}</p>
+    </section>
+
+  </div>
+
+  <div class="colofao">
+    <div class="marca">O Diário da Nitro</div>
+    Redação composta por agentes · fonte: GitHub {{REPO}}<br>
+    Edição Nº {{EDICAO_NUM}} · {{DATA_EXTENSO}}<br>
+    A próxima edição chega amanhã, às 21h.
+  </div>
+
+</div>
+</body>
+</html>
+
+<!--
+=====================================================================
+ PEDAÇOS REUTILIZÁVEIS — copie, troque o conteúdo, cole no lugar certo
+=====================================================================
+
+--- MATÉRIA (vai em {{MATERIAS}}; repita à vontade) -------------------
+
+    <section>
+      <div class="rotulo">CHAPÉU DA SEÇÃO</div>
+      <div class="materia">
+        <h3>Título da matéria, com verbo e sem jargão</h3>
+        <p class="linha-fina">Uma frase que entrega o miolo de quem só lê essa.</p>
+        <div class="corpo">
+          <p>Primeiro parágrafo…</p>
+          <p>Segundo parágrafo…</p>
+        </div>
+        <div class="importa"><b>📌 Por que importa para você:</b> a consequência
+          prática, em uma ou duas frases. (#123 → PR #124)</div>
+      </div>
+    </section>
+
+--- LINHA DE NÚMEROS (vai em {{NUMEROS_LINHAS}}; sempre em pares) ------
+
+        <tr>
+          <td><span class="rotulo-num">PRs mergeadas hoje</span>
+              <span class="valor">6</span><span class="nota">+830/−2 linhas</span></td>
+          <td><span class="rotulo-num">Issues fechadas hoje</span>
+              <span class="valor">6</span><span class="nota">5 resolvidas, 1 descartada</span></td>
+        </tr>
+
+--- ITEM DA MESA DO DONO (vai em {{MESA_ITENS}}) ----------------------
+
+        <div class="mesa-item">
+          <h4>1. O que está travado, dito em uma linha</h4>
+          <p>Por que só você pode destravar, e o que está esperando na fila.</p>
+          <p><b>Caminho:</b> passo a passo clicável, sem ambiguidade.</p>
+          <p><b>Como conferir depois:</b></p>
+          <pre>comando que prova que funcionou</pre>
+        </div>
+
+--- LINHA DO RADAR (vai em {{RADAR_ITENS}}) ---------------------------
+
+        <li><span class="num">#912</span>
+            <span>Descrição em uma frase do que está pendente e do que espera.</span></li>
+
+--- BASTIDORES: parágrafo por item ------------------------------------
+
+        <p><b>Assunto (#887).</b> O que mudou, em duas frases, sem cerimônia.</p>
+-->

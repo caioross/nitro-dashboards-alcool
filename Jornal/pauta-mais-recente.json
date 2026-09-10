@@ -1,0 +1,470 @@
+{
+  "repo": "caioross/nitro-dashboards-alcool",
+  "janela": {
+    "desde": "2026-09-08T00:00:00Z",
+    "ate": "2026-09-09T20:22:47Z"
+  },
+  "edicaoNumero": 1,
+  "geradaEm": "2026-09-09T17:22:47-03:00",
+  "issuesAbertas": [
+    {
+      "numero": 13,
+      "titulo": "Widget de clima: \"mín/máx\" mostra a temperatura instantânea repetida, não a faixa do dia",
+      "corpo": "## Problema\n\nO widget de clima na barra superior exibe uma linha **\"mín Xº · máx Yº\"** (`Dashboards/index.html:2302`),\nalimentada por `j.main.temp_min` / `j.main.temp_max` do endpoint\n`api.openweathermap.org/data/2.5/weather` (`:2334`, `:2339`).\n\nEsse endpoint é de **tempo atual**, não de previsão. Na documentação do OpenWeather, `temp_min` e\n`temp_max` são \"temperatura mínima/máxima observada no momento (dentro de grandes áreas urbanas)\" —\npara uma coordenada/cidade única eles são, na prática, **iguais (ou quase) à `temp` atual**. Não é a\nmínima/máxima do dia.\n\nResultado: o usuário vê algo como `mín 22º · máx 22º` (dois valores idênticos, aparência de widget\nquebrado) ou, quando diferem por acaso, uma \"faixa\" de 1–2º que ele interpreta como previsão do dia —\no que está errado.\n\n## Como reproduzir\n\n1. Servir o projeto por HTTP com `OPENWEATHER_API_KEY` no `.env`.\n2. Abrir o painel, importar um CSV, permitir a geolocalização.\n3. Observar a lateral do widget: \"mín\" e \"máx\" quase sempre iguais entre si e iguais à temperatura\n   principal.\n4. Conferir na aba Network a resposta de `.../data/2.5/weather`: `main.temp_min` ≈ `main.temp_max` ≈\n   `main.temp`.\n\n## Comportamento esperado\n\nUma das opções:\n\n- Não exibir \"mín/máx\" a partir desse endpoint (remover a linha ou trocar por outro dado já\n  disponível na mesma resposta — pressão, vento, visibilidade).\n- Se a faixa do dia for desejada, buscá-la de um endpoint de previsão (`/data/2.5/forecast`,\n  agregando as próximas 24 h) — porém isso adiciona outra chamada de rede a uma feature que se\n  propõe mínima.\n\nA opção sem custo de rede é deixar de rotular esses números como faixa do dia.\n\n## Comportamento atual\n\nDois números rotulados \"mín\"/\"máx\" que são a mesma leitura instantânea repetida, passando a impressão\nde bug ou de uma previsão diária que não existe.\n\n## Impacto\n\nBaixo. Feature opcional (só aparece com chave). Não corrompe dado do painel — é ruído/informação\nenganosa restrita ao widget de clima. Afeta a percepção de qualidade (\"o widget está quebrado\").\n\n## Prioridade\n\n**Baixa**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T14:24:17Z",
+      "estado": "OPEN",
+      "rotulos": [
+        "bug"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/13",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 11,
+      "titulo": "Deploy Vercel: servir o dashboard na raiz do domínio",
+      "corpo": "## Contexto\n\nLevantado na Discussion [#6 — \"Problema com o Chat dos dados\"](https://github.com/caioross/nitro-dashboards-alcool/discussions/6):\n\n> quando acesso a pagina, ela esta dentro de dashboards, então no vercel no endereço devo\n> colocar o endereço completo e isso está ruim, precisamos conseguir acessar pelo domínio\n> direto sem uma pagina a ser definida lá.\n\nO entregável fica em `Dashboards/index.html`, então no deploy da Vercel a raiz do domínio\n(`https://<projeto>.vercel.app/`) não mostra o painel — é preciso acessar\n`.../Dashboards/index.html`.\n\n## Proposta / o que fazer\n\nFazer a raiz do domínio servir o dashboard, sem mover o arquivo do repositório. Opção mais\ndireta: um `vercel.json` na raiz com um rewrite:\n\n```json\n{\n  \"rewrites\": [\n    { \"source\": \"/\", \"destination\": \"/Dashboards/index.html\" }\n  ]\n}\n```\n\n(ou `\"outputDirectory\": \"Dashboards\"` se o `Dados/` e o restante não precisarem ser servidos;\navaliar, porque hoje o botão de amostra faz `fetch('../Dados/drinks.csv')`).\n\n## Motivação / valor\n\n- URL limpa para compartilhar internamente.\n- Se as rotas `/api` da issue relacionada forem adotadas, o `vercel.json` já é o lugar da\n  configuração.\n\n## Considerações\n\n- Não mover `Dashboards/index.html`: o `README`, o `CLAUDE.md` e os caminhos relativos\n  (`../Dados/drinks.csv`, `.env`) dependem da estrutura atual.\n- Verificar se o rewrite não quebra o `fetch('../Dados/drinks.csv')` quando servido da raiz\n  (o caminho relativo muda conforme a URL efetiva).\n- Escopo pequeno, baixo risco, sem impacto no uso por `file://`.\n\n## Prioridade\n\n**Média**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T14:01:50Z",
+      "estado": "OPEN",
+      "rotulos": [
+        "enhancement"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/11",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 10,
+      "titulo": "Deploy Vercel: ler as chaves das environment variables (sem janela de chave)",
+      "corpo": "## Contexto\n\nLevantado na Discussion [#6 — \"Problema com o Chat dos dados\"](https://github.com/caioross/nitro-dashboards-alcool/discussions/6):\n\n> Não tem que ter janela pra salvar a chave de api key do gemini ou da previsão do tempo,\n> isso tudo já está nas environment variables do vercel, use de lá!\n\nHoje `ENV.load()` só obtém as chaves fazendo `fetch('.env')` (e `../.env`, `../../.env`). No\ndeploy da Vercel isso nunca funciona: o `.env` está no `.gitignore`, não vai para o build, e a\nVercel não serve as environment variables como arquivo. Resultado no site publicado: o widget\nde clima não aparece e o chat sempre cai no pedido manual de chave + `localStorage`.\n\n## Proposta / o que fazer\n\nDar um caminho nativo da Vercel para as chaves chegarem ao painel, sem a \"janela pra salvar a\nchave\". Opções (a decidir):\n\n1. **Função serverless / edge** (`/api/gemini`, `/api/weather`) que lê `process.env.GEMINI_API_KEY`\n   / `process.env.OPENWEATHER_API_KEY` e faz o proxy das chamadas. O `index.html` chama a\n   rota relativa. As chaves nunca vão ao cliente.\n2. **Substituição em build**: um `build` command (`vercel.json`) que gera um `config.js` /\n   `.env` servível a partir das env vars no momento do deploy. Mais simples, mas mantém as\n   chaves expostas no cliente (ver #7).\n3. Quando servido por HTTPS e as chaves vierem do ambiente, **esconder** o painel\n   `#aiKeyAsk` e o fallback de `localStorage`.\n\nOpção 1 é a que também resolve a exposição de chave descrita em #7 e é o que o próprio\n`README` já recomenda (\"ponha as chamadas atrás de um proxy\").\n\n## Motivação / valor\n\n- O recurso passa a funcionar no deploy real sem cada visitante ter que colar chave.\n- Elimina a UI de digitação de chave, alinhado ao princípio de \"mínimo de interações\".\n- Com a opção de proxy, as chaves saem do cliente.\n\n## Considerações\n\n- `CLAUDE.md` diz \"arquivo único, sem build step, sem dependências de runtime\". Uma função\n  `/api` na Vercel é um arquivo extra e um passo de deploy — decisão de projeto a ser tomada\n  explicitamente. O entregável `Dashboards/index.html` continua único e abrível por `file://`;\n  o proxy seria um extra ativado só no deploy.\n- Precisa manter o fallback atual (`file://` / uso offline) funcionando: sem `/api`\n  disponível, cai para o comportamento de hoje.\n- Definir os nomes das env vars na Vercel (reusar `GEMINI_API_KEY` / `OPENWEATHER_API_KEY`).\n\n## Prioridade\n\n**Al\n\n[... cortado, +66 caracteres]",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T14:01:49Z",
+      "estado": "OPEN",
+      "rotulos": [
+        "enhancement"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/10",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 9,
+      "titulo": "Chave do Gemini inválida (HTTP 400) não reabre o pedido de chave e vira erro genérico",
+      "corpo": "## Problema\n\nNo chat com IA, uma **chave do Gemini inválida** cai no fluxo de erro genérico em vez de\nreabrir o pedido de chave.\n\nA API do Gemini responde a uma chave inválida com **HTTP 400** (`API_KEY_INVALID` /\n`INVALID_ARGUMENT`) — nem sempre 401/403. Mas o tratamento só reconhece 401 e 403 como\nproblema de autenticação:\n\n```js\nconst RETRY = new Set([429, 500, 502, 503, 504, 404, 400]);   // 400 está aqui\n...\nif (res.status === 401 || res.status === 403) throw new Error('AUTH:' + ...);\nif (RETRY.has(res.status)) continue;   // 400 entra aqui e só \"tenta o próximo modelo\"\n```\n\nCom a chave inválida, **todos os 5 modelos** da cadeia retornam 400, o laço se esgota e é\nlançado `\"Todos os modelos falharam. Último: gemini-2.5-flash → HTTP 400: API key not valid…\"`.\nNo `catch` do `submit`, essa mensagem não começa com `AUTH:` nem é `NOKEY`, então:\n\n- o painel `#aiKeyAsk` **não reabre** (só reabre em `NOKEY` e `AUTH:`);\n- a mensagem exibida culpa \"todos os modelos\", não a chave;\n- o usuário fica sem caminho óbvio para corrigir a chave (precisa saber do `localStorage` ou\n  recarregar).\n\n## Como reproduzir\n\n1. Abrir \"Conversar com os dados\" (com um CSV importado).\n2. Informar uma chave qualquer inválida (ex.: `AIzaSyDUMMY_invalid_key`) e salvar.\n3. Enviar uma pergunta.\n4. Resultado: mensagem de erro \"Todos os modelos falharam… HTTP 400: API key not valid\" e o\n   campo de chave permanece escondido.\n\n## Comportamento esperado\n\nHTTP 400 com corpo indicando chave inválida (`API_KEY_INVALID`, ou mensagem contendo\n\"API key not valid\") deve ser tratado como `AUTH:` — reabrir `#aiKeyAsk`, focar o input e\nmostrar \"A chave do Gemini foi rejeitada — …\". Idealmente, um 400 de chave não deve nem\npercorrer os 5 modelos (é a mesma chave para todos).\n\n## Comportamento atual\n\nErro genérico \"Todos os modelos falharam\", campo de chave escondido, sem rota de correção.\n\n## Impacto\n\nO erro de configuração mais comum do recurso (chave digitada errada, chave de outro projeto,\nAPI \"Generative Language\" não habilitada) leva a um beco sem saída na UI. Também gera 5\nrequisições HTTP inúteis por tentativa.\n\n## Prioridade\n\n**Média**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T14:01:12Z",
+      "estado": "OPEN",
+      "rotulos": [
+        "bug"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/9",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 8,
+      "titulo": "Tela de importação promete \"nada sai deste navegador\", mas o chat envia dados do CSV ao Gemini",
+      "corpo": "## Problema\n\nA tela de importação afirma, logo abaixo da dropzone:\n\n> ou selecione manualmente · **processamento 100% local, nada sai deste navegador**\n> (`Dashboards/index.html`, `<p class=\"hint\">`)\n\nEssa promessa deixou de ser verdadeira com o recurso **\"Conversar com os dados\"**. Ao enviar\nqualquer pergunta no chat, `snapshot()` monta um resumo detalhado do CSV importado e o envia\npara `https://generativelanguage.googleapis.com` (Google Gemini) no `systemInstruction`.\n\nO que sai do navegador nesse resumo:\n\n- nome do arquivo, contagem de países e a lista de métricas (com os cabeçalhos do CSV);\n- estatística descritiva por métrica (soma, média, mediana, dp, CV, mín/máx, p25/p75);\n- matriz de correlação de Pearson entre as métricas;\n- agregado por continente;\n- **Top 20 e Bottom 20 por país** (país, continente e todos os valores);\n- quando a seleção tem ≤ 60 países, **a lista completa, país por país, com todos os valores**.\n\nOu seja, para um dataset típico o conteúdo país-a-país da planilha é transmitido a um terceiro.\n\nO widget de clima também faz chamada externa (OpenWeatherMap) e usa `navigator.geolocation`,\nmas esse não carrega dado do CSV.\n\n## Como reproduzir\n\n1. Abrir o painel, importar um CSV (o `Dados/drinks.csv` serve).\n2. Abrir \"Conversar com os dados\", configurar uma chave do Gemini, enviar qualquer pergunta.\n3. Inspecionar a aba Network: a requisição `POST .../models/<modelo>:streamGenerateContent`\n   carrega no corpo o resumo com os dados derivados do CSV.\n\n## Comportamento esperado\n\nUma das duas:\n\n- A frase \"nada sai deste navegador\" só aparece enquanto nenhum recurso de rede opcional está\n  ativo, **ou** é reescrita para deixar claro que o chat com IA envia um resumo dos dados ao\n  Google e o clima consulta o OpenWeather; idealmente com um aviso no próprio painel de chat\n  antes do primeiro envio.\n- O texto da dropzone passa a se referir só à importação/parsing (\"a planilha é lida e\n  processada no seu navegador; o envio ao Gemini, se você usar o chat, é opcional e explícito\").\n\n## Comportamento atual\n\nO usuário lê uma garantia absoluta de privacidade na entrada e, mais tarde, uma funcionalidade\ndo mesmo painel envia o conteúdo da planilha para a API do Google sem reforçar esse aviso.\n\n## Impacto\n\nQuebra de confiança e risco de conformidade: o público-alvo pode subir dados proprietários ou\nsensíveis confiando na frase exibida. As \"Notas\" do `R\n\n[... cortado, +117 caracteres]",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T14:01:10Z",
+      "estado": "OPEN",
+      "rotulos": [
+        "bug",
+        "documentation"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/8",
+      "qtdComentarios": 1
+    },
+    {
+      "numero": 7,
+      "titulo": "Chaves de API no .env são baixáveis em texto puro ao servir por HTTP",
+      "corpo": "## Problema\n\nO painel lê as chaves de API fazendo `fetch` do arquivo `.env` **servido pelo próprio\nservidor HTTP** (`ENV.load()`, `Dashboards/index.html`, tenta `.env`, `../.env`, `../../.env`).\nO `README` instrui explicitamente a servir a **raiz do repositório** por HTTP para que esse\n`fetch` funcione:\n\n> Sirva a **raiz do repositório** por HTTP para o `.env` ser encontrado\n> `python -m http.server 8000`\n\nCom qualquer servidor de arquivos estático apontado para essa pasta (o `http.server` do\nPython, nginx, Netlify, GitHub Pages, S3, um container copiando o repo inteiro), o arquivo\n`.env` passa a ser **baixável diretamente** por `GET /.env` — sem sequer abrir o dashboard.\nIsso expõe em texto puro:\n\n- `GEMINI_API_KEY`\n- `OPENWEATHER_API_KEY`\n\nO mesmo servidor de raiz também serve `/.git/`, `CLAUDE.md` etc.\n\nA exposição não é só \"erro do operador\": a arquitetura **exige** que o `.env` seja acessível\npor HTTP para a funcionalidade operar nesse modo. O `.gitignore` protege o Git, não o\nservidor web.\n\nObservação: o working tree deste ambiente já contém um `.env` na raiz com as duas chaves\npreenchidas (53 e 32 caracteres), ou seja, o cenário de risco é o fluxo real de uso.\n\n## Como reproduzir\n\n1. Criar `.env` na raiz com `GEMINI_API_KEY=...` e `OPENWEATHER_API_KEY=...` (passo do README).\n2. `python -m http.server 8000` na raiz do repositório (passo do README).\n3. Acessar `http://localhost:8000/.env` em qualquer navegador ou `curl`.\n4. As duas chaves aparecem em texto puro. O mesmo vale para `http://localhost:8000/.git/config`.\n\n## Comportamento esperado\n\nAs chaves nunca devem ser distribuíveis como asset estático. Opções:\n\n- Servir apenas a pasta `Dashboards/` (mas aí o `fetch('../.env')` também alcançaria `.env`\n  se ele estivesse um nível acima do webroot — o problema é estrutural).\n- Não depender de `.env` fetchável: usar um proxy/serverless para as chamadas ao Gemini e ao\n  OpenWeather (o próprio `README` já recomenda isso \"para uso público\"), ou injeção em build.\n- No mínimo, o `README` deveria **desaconselhar** servir a raiz do repo e o projeto deveria\n  falhar de forma segura, orientando o proxy.\n\n## Comportamento atual\n\nO caminho \"servir por HTTP\" documentado no README publica as chaves de API para qualquer\ncliente que alcance o servidor. Em host compartilhado/público elas são também rastreáveis por\ncrawler, ficam em logs de acesso e cache de CDN.\n\n## Impa\n\n[... cortado, +307 caracteres]",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T14:01:08Z",
+      "estado": "OPEN",
+      "rotulos": [
+        "bug",
+        "security"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/7",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 4,
+      "titulo": "Chat com IA (Gemini) sobre os dados + previsão do tempo no topo",
+      "corpo": "## Contexto\n\nO painel (`Dashboards/index.html`) hoje é 100% offline: o usuário sobe um CSV e explora mapa, correlações e estatística descritiva. Faltam duas capacidades pedidas:\n\n1. **Conversar com os dados** via Google Gemini.\n2. **Previsão do tempo** do usuário na barra superior (OpenWeatherMap).\n\n## Escopo\n\n### 1. Chat com IA (Gemini)\n- Botão flutuante **na parte inferior central** abre um painel de conversa.\n- O contexto enviado ao modelo é derivado do estado atual do painel e **respeita os filtros aplicados** (métrica ativa, continentes, busca de país, faixa min/max): KPIs da seleção, ranking top/bottom, agregados por continente e matriz de correlação.\n- **Cadeia de fallback de modelos**: em erro de quota (429), indisponibilidade (5xx) ou modelo inexistente (404), tenta automaticamente o próximo modelo da lista e informa qual respondeu.\n- Streaming da resposta e histórico de turnos dentro da sessão.\n\n### 2. Previsão do tempo\n- Widget na `topbar`, baseado na geolocalização do navegador (`navigator.geolocation`), com fallback para busca manual de cidade.\n- Temperatura, condição, mín/máx, sensação e umidade — em pt-BR, `Intl.NumberFormat`.\n- Cache curto em `localStorage` para não estourar o limite gratuito da API.\n\n### 3. Chaves\n- Ambas as chaves vivem em um **`.env`** na raiz (gitignored), com `.env.example` versionado.\n- **Sem `config.js`** e sem framework: o `index.html` carrega o `.env` por `fetch` em runtime.\n- Como `fetch` de `.env` falha em `file://` (mesma limitação já conhecida do botão \\\"Carregar ../Dados/drinks.csv\\\"), haverá fallback: o usuário informa as chaves na própria UI e elas ficam em `localStorage`. Servindo por HTTP o `.env` é lido sozinho.\n\n## Restrições\n- Arquivo único, sem build step, sem bibliotecas externas.\n- Nada de dado mocado — todo número no contexto da IA vem do CSV importado.\n- Paleta/tipografia da marca Nitro; UI em pt-BR.",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T12:49:46Z",
+      "estado": "CLOSED",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/4",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 3,
+      "titulo": "Erro de importação fica invisível ao trocar o CSV com o painel aberto",
+      "corpo": "## Problema\n\n`showErr()` escreve em `#intakeErr` (`Dashboards/index.html:581`), que está **dentro** de `#intake`.\nDepois da primeira importação, `#intake` recebe a classe `hide` (`#intake.hide{display:none}`,\n`:131`). O botão \"Trocar CSV\" (`#btnPick`) chama `readFile` → `ingest` sem nunca reexibir `#intake`,\nentão qualquer erro de importação é escrito em um elemento invisível.\n\nResultado: com o painel aberto, escolher um arquivo inválido **não produz nenhuma reação na tela** —\nnem erro, nem mudança de dados. O painel continua mostrando o dataset anterior como se nada tivesse\nsido feito. Vale para todas as mensagens de `showErr`, inclusive a falha de leitura do disco\n(`rd.onerror`, `:1170`).\n\nUm segundo sintoma da mesma origem: o handler de `drop` (`:1188-1191`) faz o oposto — remove `hide`\nde `#intake` **antes** de ler o arquivo, sem tirar `on` de `#dash`. Enquanto o `FileReader` trabalha,\na landing page e o dashboard ficam visíveis ao mesmo tempo; se o arquivo for inválido, os dois\npermanecem empilhados na tela.\n\n## Como reproduzir\n\n1. Abrir `Dashboards/index.html` e importar um CSV válido (o painel aparece).\n2. Clicar em \"Trocar CSV\" no cabeçalho e selecionar um arquivo inválido (por exemplo, um `.csv` com\n   uma única linha, ou um arquivo sem nenhuma coluna numérica).\n3. Observar a tela: nada acontece.\n\nVerificado na página rodando, com o painel aberto: `#intakeErr` recebe o texto\n`\"Não foi possível ler o arquivo — O arquivo precisa de um cabeçalho e ao menos uma linha de dados.\"`\ne a classe `on`, mas `getClientRects().length === 0` e o `display` computado de `#intake` é `none`.\n\n## Comportamento esperado\n\nO erro de importação precisa ser visível no contexto em que o usuário está: mensagem no dashboard\n(toast/banner no cabeçalho) ou retorno explícito à tela de importação com o erro exibido. O dataset\nanterior deve ser preservado, mas com feedback claro de que o novo arquivo foi recusado e por quê.\n\n## Comportamento atual\n\nNenhum feedback. O usuário conclui que o botão está quebrado, ou — pior — que o arquivo foi aceito e\nque os números na tela já são os novos.\n\n## Impacto\n\nFalha silenciosa em um dos dois caminhos principais de uso do painel. Além da frustração, há risco de\no usuário ler o dataset antigo achando que é o novo e tirar conclusões erradas. A inconsistência\nentre os caminhos (botão x arrastar arquivo) torna o comportamento imprevisível.\n\n## Pri\n\n[... cortado, +18 caracteres]",
+      "autor": "caioross",
+      "criadaEm": "2026-09-08T20:33:01Z",
+      "estado": "OPEN",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/3",
+      "qtdComentarios": 0
+    },
+    {
+      "numero": 2,
+      "titulo": "CSV importado é injetado via innerHTML: execução de JS arbitrário (XSS)",
+      "corpo": "## Problema\n\nConteúdo vindo do CSV do usuário (nome de país e cabeçalho de coluna) é concatenado em template\nstrings e atribuído a `innerHTML`, sem escape. Como o CSV é dado não confiável (o usuário pode ter\nrecebido a planilha de terceiros), isso permite **execução de JavaScript arbitrário** no contexto da\npágina.\n\nPontos de injeção confirmados:\n\n- `Dashboards/index.html:1927` — `t.innerHTML = h`, onde `h` contém `${d.country}` cru (`:1917`).\n- `Dashboards/index.html:1114` — `tip.innerHTML = html`, alimentado por `tipCountry()` (`:1122-1128`),\n  que interpola `d.country` e `m.short` (o `short` de métricas genéricas é o cabeçalho cru do CSV).\n- `Dashboards/index.html:1515` — legenda do mapa interpola `am.label` / `am.unit` (idem, cabeçalho cru).\n\n## Como reproduzir\n\n1. Abrir `Dashboards/index.html`.\n2. Importar um CSV com a carga no nome do país:\n\n```csv\ncountry,beer_servings,total\n\"<img src=x onerror='window.__pwned=1'>\",245,9.5\nBrazil,130,8.3\nChile,120,7.6\nPeru,100,6.1\n```\n\n3. A tabela renderiza e o `onerror` dispara imediatamente. Verificado na página rodando:\n   `window.__pwned` passa a valer `1` e o HTML da célula é\n   `<img src=\"x\" onerror=\"window.__pwned=1\">` (um `<img>` real no DOM, não texto).\n\nO mesmo vale para um cabeçalho de coluna numérica malicioso, que vira `label`/`short` de uma métrica\ngenérica e é injetado na legenda do mapa e nos tooltips.\n\n## Comportamento esperado\n\nTodo texto vindo do CSV deve ser inserido como texto (`textContent`, `document.createTextNode`) ou\nescapado antes de ir para `innerHTML`. Um nome de país com `<`, `>` ou `&` deve aparecer literalmente\nna tela.\n\n## Comportamento atual\n\nO HTML do CSV é interpretado como markup; handlers como `onerror`/`onload` executam script arbitrário\ncom acesso total à página.\n\n## Impacto\n\nServido por HTTP (cenário citado no README para o botão de amostra funcionar), a mesma origem passa a\nexecutar código de terceiros: o script pode ler o conteúdo importado, alterar os números exibidos,\ninserir UI falsa (ex.: um formulário de \"suporte\" pedindo credenciais) ou exfiltrar os dados da\nplanilha por rede — apesar da promessa de \"processamento 100% local, nada sai deste navegador\"\nexibida na tela de importação. Por `file://` o alcance é menor, mas a execução continua acontecendo.\nTambém quebra a renderização de nomes legítimos que contenham `<` ou `&`.\n\n## Prioridade\n\n**Alta**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-08T20:32:59Z",
+      "estado": "CLOSED",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/2",
+      "qtdComentarios": 1
+    },
+    {
+      "numero": 1,
+      "titulo": "toNum multiplica por 1000 decimais de 3 casas (9.234 vira 9234)",
+      "corpo": "## Problema\n\n`toNum` (`Dashboards/index.html:1032-1043`) tenta autodetectar separador de milhar pt-BR/en-US, mas a\nprimeira heurística casa também com **decimais legítimos de 3 casas**:\n\n```js\nif (/^-?\\d{1,3}(\\.\\d{3})+(,\\d+)?$/.test(s)) s = s.replace(/\\./g, '').replace(',', '.');\nelse if (/^-?\\d{1,3}(,\\d{3})+(\\.\\d+)?$/.test(s)) s = s.replace(/,/g, '');\n```\n\n`9.234` é interpretado como \"9 mil 234\" em vez de 9,234. Todo valor com 1–3 dígitos inteiros e\nexatamente 3 casas decimais é **multiplicado por 1000, silenciosamente**. O mesmo vale para a\nvariante pt-BR (`9,234` → 9234).\n\nValores com 4+ dígitos inteiros (`1234.567`) escapam porque `\\d{1,3}` não casa — ou seja, o mesmo\narquivo pode ter alguns números corretos e outros inflados em 1000×.\n\n## Como reproduzir\n\n1. Abrir `Dashboards/index.html` e importar um CSV com 3 casas decimais:\n\n```csv\ncountry,beer_servings,total_litres_of_pure_alcohol\nBrazil,245,9.234\nChile,130,0.500\nAngola,217,5.9\nPeru,163,6.1\n```\n\n2. Olhar a tabela / KPIs na métrica \"Álcool puro\".\n\nVerificação isolada da função (node):\n\n| entrada | esperado | obtido |\n|---|---|---|\n| `9.234`  | 9,234  | **9234** |\n| `0.500`  | 0,5    | **500**  |\n| `-0.125` | -0,125 | **-125** |\n| `0,750`  | 0,75   | **750**  |\n| `12.4`   | 12,4   | 12,4 (ok) |\n| `1.234,56` | 1234,56 | 1234,56 (ok) |\n\n## Comportamento esperado\n\n`9.234` → 9,234 e `0.500` → 0,5. Em caso de ambiguidade real entre separador decimal e de milhar, a\ndecisão deveria ser tomada **por coluna** (olhando todas as linhas), e não valor a valor — ou, no\nmínimo, não deveria transformar `0.500` em 500 (nenhuma notação de milhar começa com `0.`).\n\n## Comportamento atual\n\nO painel exibe os valores multiplicados por 1000, sem nenhum aviso. Confirmado na página rodando:\nimportando o CSV acima, a tabela mostra `9.234,0` e `500,0`, o KPI \"Máximo\" mostra `9.234,0` e o\nsubtítulo do histograma mostra `μ = 2.436,50 · Md = 253,05 · σ = 4.537,65`.\n\n## Impacto\n\nCorrupção silenciosa de dados que contamina **todo** o painel — KPIs, escala do mapa coroplético,\nranking, histograma, correlações de Pearson e o CSV exportado. Não há mensagem de erro; o usuário não\ntem como perceber que os números estão errados. Datasets com 3 casas decimais (per capita, litros de\nálcool puro em bases da OMS, taxas) são comuns, então a chance de ocorrer na prática é alta.\n\n## Prioridade\n\n**Crítica**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-08T20:32:58Z",
+      "estado": "CLOSED",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/1",
+      "qtdComentarios": 1
+    }
+  ],
+  "issuesFechadas": [
+    {
+      "numero": 4,
+      "titulo": "Chat com IA (Gemini) sobre os dados + previsão do tempo no topo",
+      "corpo": "## Contexto\n\nO painel (`Dashboards/index.html`) hoje é 100% offline: o usuário sobe um CSV e explora mapa, correlações e estatística descritiva. Faltam duas capacidades pedidas:\n\n1. **Conversar com os dados** via Google Gemini.\n2. **Previsão do tempo** do usuário na barra superior (OpenWeatherMap).\n\n## Escopo\n\n### 1. Chat com IA (Gemini)\n- Botão flutuante **na parte inferior central** abre um painel de conversa.\n- O contexto enviado ao modelo é derivado do estado atual do painel e **respeita os filtros aplicados** (métrica ativa, continentes, busca de país, faixa min/max): KPIs da seleção, ranking top/bottom, agregados por continente e matriz de correlação.\n- **Cadeia de fallback de modelos**: em erro de quota (429), indisponibilidade (5xx) ou modelo inexistente (404), tenta automaticamente o próximo modelo da lista e informa qual respondeu.\n- Streaming da resposta e histórico de turnos dentro da sessão.\n\n### 2. Previsão do tempo\n- Widget na `topbar`, baseado na geolocalização do navegador (`navigator.geolocation`), com fallback para busca manual de cidade.\n- Temperatura, condição, mín/máx, sensação e umidade — em pt-BR, `Intl.NumberFormat`.\n- Cache curto em `localStorage` para não estourar o limite gratuito da API.\n\n### 3. Chaves\n- Ambas as chaves vivem em um **`.env`** na raiz (gitignored), com `.env.example` versionado.\n- **Sem `config.js`** e sem framework: o `index.html` carrega o `.env` por `fetch` em runtime.\n- Como `fetch` de `.env` falha em `file://` (mesma limitação já conhecida do botão \\\"Carregar ../Dados/drinks.csv\\\"), haverá fallback: o usuário informa as chaves na própria UI e elas ficam em `localStorage`. Servindo por HTTP o `.env` é lido sozinho.\n\n## Restrições\n- Arquivo único, sem build step, sem bibliotecas externas.\n- Nada de dado mocado — todo número no contexto da IA vem do CSV importado.\n- Paleta/tipografia da marca Nitro; UI em pt-BR.",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T12:49:46Z",
+      "fechadaEm": "2026-09-09T13:27:37Z",
+      "motivo": "COMPLETED",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/4",
+      "conversa": []
+    },
+    {
+      "numero": 2,
+      "titulo": "CSV importado é injetado via innerHTML: execução de JS arbitrário (XSS)",
+      "corpo": "## Problema\n\nConteúdo vindo do CSV do usuário (nome de país e cabeçalho de coluna) é concatenado em template\nstrings e atribuído a `innerHTML`, sem escape. Como o CSV é dado não confiável (o usuário pode ter\nrecebido a planilha de terceiros), isso permite **execução de JavaScript arbitrário** no contexto da\npágina.\n\nPontos de injeção confirmados:\n\n- `Dashboards/index.html:1927` — `t.innerHTML = h`, onde `h` contém `${d.country}` cru (`:1917`).\n- `Dashboards/index.html:1114` — `tip.innerHTML = html`, alimentado por `tipCountry()` (`:1122-1128`),\n  que interpola `d.country` e `m.short` (o `short` de métricas genéricas é o cabeçalho cru do CSV).\n- `Dashboards/index.html:1515` — legenda do mapa interpola `am.label` / `am.unit` (idem, cabeçalho cru).\n\n## Como reproduzir\n\n1. Abrir `Dashboards/index.html`.\n2. Importar um CSV com a carga no nome do país:\n\n```csv\ncountry,beer_servings,total\n\"<img src=x onerror='window.__pwned=1'>\",245,9.5\nBrazil,130,8.3\nChile,120,7.6\nPeru,100,6.1\n```\n\n3. A tabela renderiza e o `onerror` dispara imediatamente. Verificado na página rodando:\n   `window.__pwned` passa a valer `1` e o HTML da célula é\n   `<img src=\"x\" onerror=\"window.__pwned=1\">` (um `<img>` real no DOM, não texto).\n\nO mesmo vale para um cabeçalho de coluna numérica malicioso, que vira `label`/`short` de uma métrica\ngenérica e é injetado na legenda do mapa e nos tooltips.\n\n## Comportamento esperado\n\nTodo texto vindo do CSV deve ser inserido como texto (`textContent`, `document.createTextNode`) ou\nescapado antes de ir para `innerHTML`. Um nome de país com `<`, `>` ou `&` deve aparecer literalmente\nna tela.\n\n## Comportamento atual\n\nO HTML do CSV é interpretado como markup; handlers como `onerror`/`onload` executam script arbitrário\ncom acesso total à página.\n\n## Impacto\n\nServido por HTTP (cenário citado no README para o botão de amostra funcionar), a mesma origem passa a\nexecutar código de terceiros: o script pode ler o conteúdo importado, alterar os números exibidos,\ninserir UI falsa (ex.: um formulário de \"suporte\" pedindo credenciais) ou exfiltrar os dados da\nplanilha por rede — apesar da promessa de \"processamento 100% local, nada sai deste navegador\"\nexibida na tela de importação. Por `file://` o alcance é menor, mas a execução continua acontecendo.\nTambém quebra a renderização de nomes legítimos que contenham `<` ou `&`.\n\n## Prioridade\n\n**Alta**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-08T20:32:59Z",
+      "fechadaEm": "2026-09-09T14:25:01Z",
+      "motivo": "COMPLETED",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/2",
+      "conversa": [
+        {
+          "autor": "caioross",
+          "quando": "2026-09-09T14:25:00Z",
+          "texto": "<!-- agente:agente---resolver-issue -->\n> PR aberta automaticamente pelo agente Resolvedor de Issues. Revise antes do merge.\n\nCorrigido em #14.\n\nNovo helper `escHtml` aplicado nos pontos de injeção citados: `tipCountry()` (nome/continente/ISO3/`m.short`), legenda do mapa (`am.label`/`am.unit`), tooltip da matriz de correlação (`ms[].short`) e linha da tabela de ranking (nome/ISO3/continente). A seção de chat com IA já escapava via `esc()` local — não tocada.\n\nValidado: `node --check` OK; importando o payload da Issue no painel, `window.__pwned` fica `undefined`, a célula vira `&lt;img...&gt;` e há `0` elementos `<img>`/`<script>` injetados na tabela/tooltip/legenda; sem regressão com o `drinks.csv` (12 países, mapa e KPIs corretos, console limpo)."
+        }
+      ]
+    },
+    {
+      "numero": 1,
+      "titulo": "toNum multiplica por 1000 decimais de 3 casas (9.234 vira 9234)",
+      "corpo": "## Problema\n\n`toNum` (`Dashboards/index.html:1032-1043`) tenta autodetectar separador de milhar pt-BR/en-US, mas a\nprimeira heurística casa também com **decimais legítimos de 3 casas**:\n\n```js\nif (/^-?\\d{1,3}(\\.\\d{3})+(,\\d+)?$/.test(s)) s = s.replace(/\\./g, '').replace(',', '.');\nelse if (/^-?\\d{1,3}(,\\d{3})+(\\.\\d+)?$/.test(s)) s = s.replace(/,/g, '');\n```\n\n`9.234` é interpretado como \"9 mil 234\" em vez de 9,234. Todo valor com 1–3 dígitos inteiros e\nexatamente 3 casas decimais é **multiplicado por 1000, silenciosamente**. O mesmo vale para a\nvariante pt-BR (`9,234` → 9234).\n\nValores com 4+ dígitos inteiros (`1234.567`) escapam porque `\\d{1,3}` não casa — ou seja, o mesmo\narquivo pode ter alguns números corretos e outros inflados em 1000×.\n\n## Como reproduzir\n\n1. Abrir `Dashboards/index.html` e importar um CSV com 3 casas decimais:\n\n```csv\ncountry,beer_servings,total_litres_of_pure_alcohol\nBrazil,245,9.234\nChile,130,0.500\nAngola,217,5.9\nPeru,163,6.1\n```\n\n2. Olhar a tabela / KPIs na métrica \"Álcool puro\".\n\nVerificação isolada da função (node):\n\n| entrada | esperado | obtido |\n|---|---|---|\n| `9.234`  | 9,234  | **9234** |\n| `0.500`  | 0,5    | **500**  |\n| `-0.125` | -0,125 | **-125** |\n| `0,750`  | 0,75   | **750**  |\n| `12.4`   | 12,4   | 12,4 (ok) |\n| `1.234,56` | 1234,56 | 1234,56 (ok) |\n\n## Comportamento esperado\n\n`9.234` → 9,234 e `0.500` → 0,5. Em caso de ambiguidade real entre separador decimal e de milhar, a\ndecisão deveria ser tomada **por coluna** (olhando todas as linhas), e não valor a valor — ou, no\nmínimo, não deveria transformar `0.500` em 500 (nenhuma notação de milhar começa com `0.`).\n\n## Comportamento atual\n\nO painel exibe os valores multiplicados por 1000, sem nenhum aviso. Confirmado na página rodando:\nimportando o CSV acima, a tabela mostra `9.234,0` e `500,0`, o KPI \"Máximo\" mostra `9.234,0` e o\nsubtítulo do histograma mostra `μ = 2.436,50 · Md = 253,05 · σ = 4.537,65`.\n\n## Impacto\n\nCorrupção silenciosa de dados que contamina **todo** o painel — KPIs, escala do mapa coroplético,\nranking, histograma, correlações de Pearson e o CSV exportado. Não há mensagem de erro; o usuário não\ntem como perceber que os números estão errados. Datasets com 3 casas decimais (per capita, litros de\nálcool puro em bases da OMS, taxas) são comuns, então a chance de ocorrer na prática é alta.\n\n## Prioridade\n\n**Crítica**",
+      "autor": "caioross",
+      "criadaEm": "2026-09-08T20:32:58Z",
+      "fechadaEm": "2026-09-09T14:22:04Z",
+      "motivo": "COMPLETED",
+      "rotulos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/1",
+      "conversa": [
+        {
+          "autor": "caioross",
+          "quando": "2026-09-09T14:22:03Z",
+          "texto": "<!-- agente:agente---resolver-issue -->\n> PR aberta automaticamente pelo agente Resolvedor de Issues. Revise antes do merge.\n\nCorrigido em #12.\n\n`toNum` deixa de assumir separador de milhar num grupo isolado de 3 dígitos: `9.234 → 9,234`, `0.500 → 0,5`, `-0.125 → -0,125`, `0,750 → 0,75`. Milhar sem ambiguidade (`1.234.567`, `1.234,56`, `1,234.56`) continua correto.\n\nValidado: `node --check` OK; 18 casos isolados da função; e no painel importando o CSV da Issue o KPI Máximo passou a mostrar 9,2 (Brazil) e Mínimo 0,5 (Chile).\n\nTrade-off registrado na PR: um `3.000` pt-BR querendo dizer \"3 mil\" (sem decimais) passa a ser lido como 3 — a mesma ambiguidade citada na Issue, resolvida a favor do comportamento esperado documentado."
+        }
+      ]
+    }
+  ],
+  "prsAbertos": [
+    {
+      "numero": 14,
+      "titulo": "fix: escapa texto do CSV antes de innerHTML — corrige XSS (#2)",
+      "corpo": "## Contexto\n\nConteúdo vindo do CSV do usuário (nome de país e cabeçalho de coluna — dado não confiável) era concatenado cru em template strings atribuídas a `innerHTML`, sem escape. Isso permitia **execução de JavaScript arbitrário** no contexto da página: um nome de país como `<img src=x onerror='...'>` disparava o handler imediatamente ao renderizar a tabela. Servido por HTTP, código de terceiros passa a rodar na mesma origem — apesar da promessa de \"nada sai deste navegador\".\n\nCloses #2\n\n## O que mudou e por quê\n\nAdiciona um helper `escHtml` na seção de helpers e aplica nos pontos de injeção confirmados na Issue:\n\n| local | valores escapados |\n|---|---|\n| `tipCountry()` (tooltip de país — mapa, dispersão, ranking) | `d.country`, `d.continent`, `d.iso3`, `m.short` |\n| legenda do mapa (`renderMap`) | `am.label`, `am.unit` |\n| tooltip da matriz de correlação (`renderCorr`) | `ms[j].short`, `ms[i].short` |\n| linha da tabela de ranking (`renderTable`) | `d.country`, `d.iso3`, `d.continent` |\n\n`short`/`label`/`unit` são hardcoded para as métricas conhecidas, mas viram o **cabeçalho cru do CSV** para métricas genéricas — por isso também são escapados.\n\nNão alterado: a seção de chat com IA (Gemini) já escapa tudo via seu `esc()` local; os rótulos SVG usam `el(tag, {text})` que grava `textContent` (seguro); `#matchCount`/KPIs só interpolam números; `th.innerHTML +=` na tabela opera sobre `textContent` já definido (re-serializado escapado).\n\n## Como foi testado\n\n- `node --check` no script extraído: **OK**.\n- Payload da Issue (`\"<img src=x onerror='window.__pwned=1'>\"` como nome de país + `\"<script>col onerror\"` como cabeçalho), importado no painel rodando:\n  - `window.__pwned` permanece `undefined`;\n  - célula da tabela: `innerHTML` = `&lt;img src=x onerror=...&gt;`, `0` elementos `<img>`/`<script>` no `#tbl`;\n  - tooltip de país e da matriz: payload renderizado como texto literal, `0` `<img>`/`<script>` em `#tip`;\n  - legenda do mapa com a coluna maliciosa ativa: texto literal, `0` elementos injetados.\n- Regressão com dados válidos (subconjunto do `drinks.csv`): 12 países, 12 linhas na tabela, 195 paths no mapa, KPIs corretos (Máximo 12,4 / Mínimo 0,0), nomes legítimos (\"Andorra\", \"Russian Federation\") intactos, console sem erros.\n\n## Riscos / impacto\n\nBaixo. `escHtml` só troca `& < > \" '` por entidades; nenhum nome de país real conterá esses caracteres. Mudança r\n\n[... cortado, +236 caracteres]",
+      "autor": "caioross",
+      "criadoEm": "2026-09-09T14:24:49Z",
+      "mergeadoEm": null,
+      "fechadoEm": null,
+      "rascunho": false,
+      "linhas": {
+        "mais": 13,
+        "menos": 6,
+        "arquivos": 1
+      },
+      "rotulos": [],
+      "resolve": [
+        "#2"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/pull/14"
+    },
+    {
+      "numero": 12,
+      "titulo": "fix: toNum não multiplica por 1000 decimais de 3 casas (#1)",
+      "corpo": "## Contexto\n\n`toNum` (`Dashboards/index.html`) autodetecta separador de milhar pt-BR/en-US, mas a primeira heurística casava também com **decimais legítimos de 3 casas**. `9.234` era lido como \"9 mil 234\" e `0.500` como 500 — silenciosamente. Como valores com 4+ dígitos inteiros escapavam (`\\d{1,3}`), o mesmo arquivo podia ter números certos e outros inflados 1000×, sem nenhum aviso. Isso contamina KPIs, escala do mapa, ranking, histograma, correlações e o CSV exportado.\n\nCloses #1\n\n## O que mudou e por quê\n\nUma única linha da heurística de `toNum`. Um separador de milhar agora só é assumido quando **não é ambíguo** com um decimal:\n\n- **2+ grupos de 3 dígitos** — `1.234.567` / `1,234,567` (nenhuma notação decimal se parece com isso); ou\n- **1 grupo seguido de parte decimal com o outro símbolo** — `1.234,56` / `1,234.56`.\n\nUm único grupo isolado (`9.234`, `0,500`, `-0.125`) passa a ser tratado como **decimal** — nunca multiplicado por 1000. Isso implementa a resolução pedida na Issue (\"no mínimo, não deveria transformar `0.500` em 500\").\n\n**Trade-off assumido:** um valor pt-BR como `3.000` querendo dizer \"3 mil\" (sem casas decimais) agora é lido como `3`. É a ambiguidade real citada na própria Issue; a decisão segue o comportamento esperado documentado (`9.234 → 9,234`). Números com separador de milhar sem ambiguidade (2+ grupos, ou com decimal) continuam corretos.\n\n## Como foi testado\n\n- `node --check` no script extraído: **OK**.\n- Tabela de verificação isolada da função (18 casos), incluindo todos os da Issue:\n\n| entrada | esperado | obtido |\n|---|---|---|\n| `9.234` | 9,234 | 9,234 ✅ |\n| `0.500` | 0,5 | 0,5 ✅ |\n| `-0.125` | -0,125 | -0,125 ✅ |\n| `0,750` | 0,75 | 0,75 ✅ |\n| `12.4` | 12,4 | 12,4 ✅ |\n| `1.234,56` | 1234,56 | 1234,56 ✅ |\n| `1,234.56` | 1234,56 | 1234,56 ✅ |\n| `1.234.567` | 1234567 | 1234567 ✅ |\n| `1,234,567` | 1234567 | 1234567 ✅ |\n\n- No painel rodando, importando o CSV da Issue (`Brazil,245,9.234` / `Chile,130,0.500`): KPI **Máximo = 9,2 (Brazil)**, **Mínimo = 0,5 (Chile)**, histograma `μ = 5,43 · Md = 6,00 · σ = 3,63`. Antes: `9.234` e `500`.\n\n## Riscos / impacto\n\nBaixo. Mudança contida em `toNum`; nenhuma outra função tocada. O único comportamento alterado de propósito é a leitura de um grupo isolado de 3 dígitos como decimal (ver trade-off acima).\n\n<!-- agente:agente---resolver-issue -->\n> PR aberta automaticamente pelo agente Resolvedor de\n\n[... cortado, +95 caracteres]",
+      "autor": "caioross",
+      "criadoEm": "2026-09-09T14:21:52Z",
+      "mergeadoEm": null,
+      "fechadoEm": null,
+      "rascunho": false,
+      "linhas": {
+        "mais": 6,
+        "menos": 3,
+        "arquivos": 1
+      },
+      "rotulos": [],
+      "resolve": [
+        "#1"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/pull/12"
+    },
+    {
+      "numero": 5,
+      "titulo": "Chat com IA (Gemini) sobre os dados filtrados + previsão do tempo na barra superior",
+      "corpo": "Closes #4\n\nDuas integrações opcionais no `Dashboards/index.html` — mesmo arquivo único, sem build step, sem bibliotecas. **Sem chave, o painel se comporta exatamente como antes.**\n\n## Chat com IA (Gemini)\n\nBotão **\"Conversar com os dados\"** na parte inferior central, revelado junto com o painel.\n\n**Respeita os filtros aplicados** — este era o ponto central do pedido. O contexto é montado a partir de `filtered()`, então a métrica em foco, os continentes, a busca de país e a faixa mín/máx entram na pergunta. Chips no topo do modal mostram o recorte enviado e acompanham o repaint (`refreshAIScope()` no fim de `paint()`), de modo que mudar um filtro no meio da conversa já muda a próxima resposta.\n\nVão no contexto: estatística descritiva da seleção, correlações de Pearson, agregado por continente e o ranking — tudo calculado do CSV importado. Nenhum número embutido.\n\n**Fallback de modelos:** quota (429), indisponibilidade (5xx), modelo retirado (404) ou resposta vazia caem automaticamente para o próximo da cadeia — `gemini-3.8-flash` → `gemini-3.5-flash` → `gemini-flash-latest` → `gemini-3.5-flash-lite` → `gemini-2.5-flash`. 401/403 abortam e pedem a chave de novo. O rodapé mostra qual modelo respondeu.\n\n## Previsão do tempo\n\nWidget na `topbar` via `navigator.geolocation` → OpenWeatherMap (pt-BR, °C, ícones SVG próprios). Permissão negada? O widget vira clicável e aceita a cidade digitada. Cache de 15 min em `localStorage` para não queimar o limite gratuito. Oculto abaixo de 900 px.\n\n## Chaves\n\nAmbas no **`.env`** da raiz — gitignored, com `.env.example` versionado. Lido em runtime por `fetch`, **sem `config.js`** e sem build step.\n\nComo `fetch` de `.env` é bloqueado em `file://` (mesma limitação já documentada do botão *\"Carregar ../Dados/drinks.csv\"*), há fallback: o chat pede a chave na própria interface e a guarda no `localStorage`. Servindo a raiz por HTTP, o `.env` é lido sozinho.\n\n```bash\ncp .env.example .env   # preencha as duas chaves\npython -m http.server 8000\n# http://localhost:8000/Dashboards/index.html\n```\n\n## Dois bugs encontrados e corrigidos durante o teste\n\n- **O SSE do Gemini usa CRLF.** Os eventos vêm separados por `\\r\\n\\r\\n` e o último pode não ter delimitador — o parser original descartava a resposta inteira em silêncio, e a cadeia de fallback percorria todos os modelos reportando \"respondeu vazio\". Agora normaliza `\\r\\n` → `\\n` e consome o b\n\n[... cortado, +1240 caracteres]",
+      "autor": "caioross",
+      "criadoEm": "2026-09-09T13:13:43Z",
+      "mergeadoEm": "2026-09-09T13:27:36Z",
+      "fechadoEm": "2026-09-09T13:27:36Z",
+      "rascunho": false,
+      "linhas": {
+        "mais": 830,
+        "menos": 2,
+        "arquivos": 5
+      },
+      "rotulos": [],
+      "resolve": [
+        "#4"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/pull/5"
+    }
+  ],
+  "prsMergeados": [
+    {
+      "numero": 5,
+      "titulo": "Chat com IA (Gemini) sobre os dados filtrados + previsão do tempo na barra superior",
+      "corpo": "Closes #4\n\nDuas integrações opcionais no `Dashboards/index.html` — mesmo arquivo único, sem build step, sem bibliotecas. **Sem chave, o painel se comporta exatamente como antes.**\n\n## Chat com IA (Gemini)\n\nBotão **\"Conversar com os dados\"** na parte inferior central, revelado junto com o painel.\n\n**Respeita os filtros aplicados** — este era o ponto central do pedido. O contexto é montado a partir de `filtered()`, então a métrica em foco, os continentes, a busca de país e a faixa mín/máx entram na pergunta. Chips no topo do modal mostram o recorte enviado e acompanham o repaint (`refreshAIScope()` no fim de `paint()`), de modo que mudar um filtro no meio da conversa já muda a próxima resposta.\n\nVão no contexto: estatística descritiva da seleção, correlações de Pearson, agregado por continente e o ranking — tudo calculado do CSV importado. Nenhum número embutido.\n\n**Fallback de modelos:** quota (429), indisponibilidade (5xx), modelo retirado (404) ou resposta vazia caem automaticamente para o próximo da cadeia — `gemini-3.8-flash` → `gemini-3.5-flash` → `gemini-flash-latest` → `gemini-3.5-flash-lite` → `gemini-2.5-flash`. 401/403 abortam e pedem a chave de novo. O rodapé mostra qual modelo respondeu.\n\n## Previsão do tempo\n\nWidget na `topbar` via `navigator.geolocation` → OpenWeatherMap (pt-BR, °C, ícones SVG próprios). Permissão negada? O widget vira clicável e aceita a cidade digitada. Cache de 15 min em `localStorage` para não queimar o limite gratuito. Oculto abaixo de 900 px.\n\n## Chaves\n\nAmbas no **`.env`** da raiz — gitignored, com `.env.example` versionado. Lido em runtime por `fetch`, **sem `config.js`** e sem build step.\n\nComo `fetch` de `.env` é bloqueado em `file://` (mesma limitação já documentada do botão *\"Carregar ../Dados/drinks.csv\"*), há fallback: o chat pede a chave na própria interface e a guarda no `localStorage`. Servindo a raiz por HTTP, o `.env` é lido sozinho.\n\n```bash\ncp .env.example .env   # preencha as duas chaves\npython -m http.server 8000\n# http://localhost:8000/Dashboards/index.html\n```\n\n## Dois bugs encontrados e corrigidos durante o teste\n\n- **O SSE do Gemini usa CRLF.** Os eventos vêm separados por `\\r\\n\\r\\n` e o último pode não ter delimitador — o parser original descartava a resposta inteira em silêncio, e a cadeia de fallback percorria todos os modelos reportando \"respondeu vazio\". Agora normaliza `\\r\\n` → `\\n` e consome o b\n\n[... cortado, +1240 caracteres]",
+      "autor": "caioross",
+      "criadoEm": "2026-09-09T13:13:43Z",
+      "mergeadoEm": "2026-09-09T13:27:36Z",
+      "fechadoEm": "2026-09-09T13:27:36Z",
+      "rascunho": false,
+      "linhas": {
+        "mais": 830,
+        "menos": 2,
+        "arquivos": 5
+      },
+      "rotulos": [],
+      "resolve": [
+        "#4"
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/pull/5"
+    }
+  ],
+  "prsFechadosSemMerge": [],
+  "discussions": [
+    {
+      "numero": 15,
+      "titulo": "Exportar o mapa e os gráficos como imagem (não só CSV)",
+      "corpo": "Testei aqui com o drinks.csv e o painel é ótimo pra bater o olho. Meu problema é prático: quando acho o número que preciso (o ranking de álcool puro, o mapa por continente), eu preciso levar aquilo pra uma reunião — e hoje só dá pra exportar CSV. Aí eu dou um print da tela, que sai com o fundo escuro cortado, a barra de filtro no meio, e fica feio no slide.\nO que ajudaria muito:\n\num \"baixar PNG\" no mapa e nos gráficos (dá pra serializar o SVG / usar canvas, sem lib externa);\nou pelo menos um @media print decente pra eu dar Ctrl+P e sair um PDF limpo, uma seção por página.\n\nNão precisa de tela nova nem de \"gerar relatório\" — só o que já está na tela indo pra um arquivo que eu consiga colar num deck. Me economiza uns 10 minutos toda vez.\n\n— Ana, analista de marketing (Ambev) · Câmara de Personas",
+      "categoria": "Ideas",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T16:55:23Z",
+      "atualizadaEm": "2026-09-09T16:56:33Z",
+      "nova": true,
+      "respondida": false,
+      "qtdComentarios": 1,
+      "comentariosNovos": [
+        {
+          "autor": "caioross",
+          "quando": "2026-09-09T16:56:33Z",
+          "texto": "Apoio, e queria somar a parte de @media print, que é a de menor esforço e já cobre a maior parte do teu caso, Ana:\n\n.panel { break-inside: avoid; page-break-after: always } pra sair uma seção por página;\nfundo claro só na impressão (body { background:#fff; color:#03263f }) e esconder .rail, o FAB e o botão de suporte;\ntrocar linhas de grade e traços dos SVG por um cinza médio que sobrevive no papel.\n\nSão ~30 linhas de CSS, zero JS, não mexe em nada da tela. O PNG por serialização de SVG é ótimo como passo 2, mas o Ctrl+P limpo dá pra entregar já.\n\n— Duda, especialista de UI/UX · Câmara de Personas"
+        }
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/discussions/15"
+    },
+    {
+      "numero": 18,
+      "titulo": "Rótulos em 9,5px com tracking muito largo: legibilidade e hierarquia",
+      "corpo": "Adorei a direção visual — Admiral Blue, o Chartreuse pontual, Poppins, números tabulares. Mas a tipografia de apoio está me incomodando e acho que tem conserto barato.\nO que vi (com o CSS aberto):\n\nrótulos de KPI e cabeçalhos de tabela em 9.5px com letter-spacing de ~1,8px (≈0,19em). Nesse tamanho o tracking tão largo separa as letras a ponto de a palavra parar de ser lida como bloco — \"DESVIO PADRÃO\" vira D E S V I O.\n--ink-3 (#6B8CA6) sobre o #01111d dá ~5:1. Passa o AA raspando pra texto normal, mas esse texto é minúsculo e em caixa alta; na prática cansa.\n\nProposta, tudo em token, sem quebrar a \"wide-set typography\":\n\nsubir os rótulos de 9,5 → 11px (cabeçalho de tabela idem);\nbaixar o tracking de ~0,19em → 0,08–0,10em;\nclarear --ink-3 um passo, algo como #8AA9C4, mantendo --ink-2 para o texto de leitura.\n\nO \"wide-set\" continua na marca, só que legível. Se quiserem, detalho os valores exatos por seletor.\n\n— Duda, especialista de UI/UX · Câmara de Personas",
+      "categoria": "Ideas",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T16:56:27Z",
+      "atualizadaEm": "2026-09-09T16:56:27Z",
+      "nova": true,
+      "respondida": false,
+      "qtdComentarios": 0,
+      "comentariosNovos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/discussions/18"
+    },
+    {
+      "numero": 16,
+      "titulo": "O que é \"álcool puro\" e o que conta como uma \"dose\"?",
+      "corpo": "Oi! Entrei no painel de curiosidade pra ver se meu país bebe mais que os vizinhos (abri no celular). É bonito, mas travei em algumas palavras e não achei explicação em lugar nenhum:\n\n\"Álcool puro (litros/pessoa/ano)\" — é litro de bebida ou litro do álcool de dentro da bebida? Por pessoa por ano parece pouco, então acho que é a segunda, mas não tenho certeza.\n\"Doses/pessoa/ano\" na cerveja e nos destilados — uma dose é uma lata? um copo? \"438 doses de destilado\" em Granada não me diz nada sem saber o tamanho da dose.\n\"quantis\" na escala do mapa — não sei o que muda quando troco pra \"linear\".\n\nSeria ótimo ter um \"?\" do lado de cada um desses com uma frase explicando, ou um glossário curto. Do jeito que está, quem não é da área (eu) olha os números e não sabe se é muito ou pouco.\n\n— Bia, 22 anos, consome álcool socialmente · Câmara de Personas",
+      "categoria": "Q&A",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T16:55:38Z",
+      "atualizadaEm": "2026-09-09T16:56:02Z",
+      "nova": true,
+      "respondida": false,
+      "qtdComentarios": 1,
+      "comentariosNovos": [
+        {
+          "autor": "caioross",
+          "quando": "2026-09-09T16:56:02Z",
+          "texto": "Reforço o pedido da Bia por um ângulo diferente: a ausência de definição de \"dose\" não é só confusa, ela atrapalha a leitura responsável dos dados. \"326 doses de destilado por ano\" pode soar como exagero absurdo ou como banalidade, dependendo de a pessoa imaginar 30 ml ou 100 ml por dose. Uma definição fixa e visível (o padrão de dose usado pela fonte, em gramas de álcool) ancora a interpretação e evita tanto o alarmismo quanto o \"ah, então é pouco\". Um glossário curto resolve as duas coisas de uma vez.\n\n— Carlos, em recuperação, interessado no tema de dependência · Câmara de Personas"
+        }
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/discussions/16"
+    },
+    {
+      "numero": 17,
+      "titulo": "Falta fonte, ano de referência e um mínimo de contexto — hoje o painel lê como um ranking",
+      "corpo": "Passei um tempo navegando no painel com a amostra. A parte técnica está bem feita — meu ponto é sobre como os números se apresentam.\nNão encontrei em nenhum lugar: de onde vêm os dados, de que ano são, e o que exatamente está sendo medido (consumo per capita da população adulta? só o consumo registrado?). Para um painel sobre consumo de álcool isso não é detalhe — muda como a pessoa lê cada linha.\nSomado a isso, a seção de ranking se chama \"Maiores consumidores\" e tem um pódio visual. Sem nenhuma frase de contexto, ela vira uma tabela de recordes. Não estou pedindo tom professoral nem aviso legal gigante — só o suficiente pra deixar claro que são dados de saúde pública, não um placar.\nSugestões que cabem no arquivo único:\n\numa linha de metodologia no rodapé (fonte, ano, definição de \"álcool puro\", o que é consumo registrado);\nrepensar o título/subtítulo do ranking pra algo mais descritivo que \"maiores consumidores\";\nopcionalmente, uma nota curta de que a média nacional não descreve o consumo individual — ela esconde tanto quem não bebe quanto quem bebe muito.\n\n\n— Carlos, em recuperação, interessado no tema de dependência · Câmara de Personas",
+      "categoria": "Ideas",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T16:56:01Z",
+      "atualizadaEm": "2026-09-09T16:56:01Z",
+      "nova": true,
+      "respondida": false,
+      "qtdComentarios": 0,
+      "comentariosNovos": [],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/discussions/17"
+    },
+    {
+      "numero": 6,
+      "titulo": "Problema com o Chat dos dados",
+      "corpo": "Não tem que ter janela pra salvar a chave de api key do gemini ou da previsão do tempo, isso tudo já está nas environment variables do vercel, use de lá!\noutro ponto, quando acesso a pagina, ela esta dentro de dashboards, então no vercel no endereço devo colocar o endereço completo e isso está ruim, precisamos conseguir acessar pelo domínio direto sem uma pagina a ser definida lá.",
+      "categoria": "Ideas",
+      "autor": "caioross",
+      "criadaEm": "2026-09-09T13:41:06Z",
+      "atualizadaEm": "2026-09-09T14:02:07Z",
+      "nova": true,
+      "respondida": false,
+      "qtdComentarios": 1,
+      "comentariosNovos": [
+        {
+          "autor": "caioross",
+          "quando": "2026-09-09T14:02:06Z",
+          "texto": "Abri duas Issues a partir desta Discussion, para dar rastreabilidade:\n\n#10 — Deploy Vercel: ler as chaves das environment variables (sem janela de chave): hoje ENV.load() só lê as chaves via fetch(.env), o que nunca funciona no deploy da Vercel (o .env é gitignored e a Vercel não serve as env vars como arquivo). A Issue propõe uma rota /api (proxy) ou substituição em build, e esconder o pedido manual de chave quando as chaves vierem do ambiente.\n#11 — Deploy Vercel: servir o dashboard na raiz do domínio: vercel.json com rewrite de / para /Dashboards/index.html, sem mover o arquivo.\n\nDetalhes, alternativas e as restrições do projeto (arquivo único / sem build step) estão descritos em cada Issue."
+        }
+      ],
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/discussions/6"
+    }
+  ],
+  "commits": [
+    {
+      "sha": "515db92",
+      "mensagem": "Add files via upload",
+      "autor": "caioross",
+      "quando": "2026-09-09T20:01:01Z",
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/commit/515db920d3fc9e58cb01cf6a44bce09dd90d9a7a"
+    },
+    {
+      "sha": "a87bff9",
+      "mensagem": "🐣 regrinha de commit fofinho pro fim dos tempos 🌋💀",
+      "autor": "caioross",
+      "quando": "2026-09-09T18:26:53Z",
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/commit/a87bff95665d442593e063c889a737e249a81906"
+    },
+    {
+      "sha": "4f4d75e",
+      "mensagem": "Merge pull request #5 from caioross/feat/gemini-chat-e-clima",
+      "autor": "caioross",
+      "quando": "2026-09-09T13:27:35Z",
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/commit/4f4d75e432fa5781f497a93396ecf2d7026ce5e6"
+    },
+    {
+      "sha": "4534e42",
+      "mensagem": "feat: chat com IA (Gemini) sobre os dados filtrados e clima na barra superior",
+      "autor": "caioross",
+      "quando": "2026-09-09T13:12:35Z",
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/commit/4534e4223cc39342dd972a4b26fe30b188a97b1c"
+    },
+    {
+      "sha": "b1b7317",
+      "mensagem": "Commit inicial: dashboard de consumo de bebidas alcoólicas da Nitro",
+      "autor": "caioross",
+      "quando": "2026-09-08T19:59:23Z",
+      "url": "https://github.com/caioross/nitro-dashboards-alcool/commit/b1b73175a558c69d9e8cb433edce85ab7d5974af"
+    }
+  ],
+  "releases": [],
+  "estoque": {
+    "issuesAbertas": 7,
+    "prsAbertos": 2,
+    "prsRascunho": 0,
+    "estrelas": 0,
+    "maisVelhasParadas": [
+      {
+        "numero": 3,
+        "titulo": "Erro de importação fica invisível ao trocar o CSV com o painel aberto",
+        "diasParada": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/3"
+      },
+      {
+        "numero": 7,
+        "titulo": "Chaves de API no .env são baixáveis em texto puro ao servir por HTTP",
+        "diasParada": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/7"
+      },
+      {
+        "numero": 8,
+        "titulo": "Tela de importação promete \"nada sai deste navegador\", mas o chat envia dados do CSV ao Gemini",
+        "diasParada": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/8"
+      },
+      {
+        "numero": 9,
+        "titulo": "Chave do Gemini inválida (HTTP 400) não reabre o pedido de chave e vira erro genérico",
+        "diasParada": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/9"
+      },
+      {
+        "numero": 10,
+        "titulo": "Deploy Vercel: ler as chaves das environment variables (sem janela de chave)",
+        "diasParada": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/issues/10"
+      }
+    ],
+    "prsEsperando": [
+      {
+        "numero": 14,
+        "titulo": "fix: escapa texto do CSV antes de innerHTML — corrige XSS (#2)",
+        "rascunho": false,
+        "diasAberto": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/pull/14"
+      },
+      {
+        "numero": 12,
+        "titulo": "fix: toNum não multiplica por 1000 decimais de 3 casas (#1)",
+        "rascunho": false,
+        "diasAberto": 0,
+        "url": "https://github.com/caioross/nitro-dashboards-alcool/pull/12"
+      }
+    ]
+  },
+  "placar": {
+    "issuesAbertas": 10,
+    "issuesFechadas": 3,
+    "issuesResolvidas": 3,
+    "issuesDescartadas": 0,
+    "prsAbertos": 3,
+    "prsMergeados": 1,
+    "prsFechadosSemMerge": 0,
+    "discussionsNovas": 5,
+    "discussionsMovimentadas": 5,
+    "commits": 5,
+    "releases": 0,
+    "linhasMais": 830,
+    "linhasMenos": 2,
+    "backlogAberto": 7,
+    "saldoDoDia": -7
+  },
+  "diaVazio": false
+}
